@@ -5,161 +5,691 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>System RPG v24</title>
+  <title>Routine RPG Final V26</title>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* --- 1. ZÁKLADNÍ DESIGN & iPhone FIXES --- */
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: #F0EEF8; font-family: -apple-system, system-ui, sans-serif; color: #1F2937; overflow-x: hidden; }
-    .phone { max-width: 450px; width: 100%; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 110px; }
+    /* ==========================================================================
+       1. ZÁKLADNÍ STYLY A PROMĚNNÉ
+       ========================================================================== */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-tap-highlight-color: transparent; 
+    }
 
-    /* --- 2. ANIMACE --- */
-    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    body { 
+      background: #F0EEF8; 
+      font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      color: #1F2937; 
+      overflow-x: hidden; 
+      line-height: 1.5;
+    }
+
+    .phone { 
+      max-width: 450px; 
+      width: 100%; 
+      margin: 0 auto; 
+      min-height: 100vh; 
+      position: relative; 
+      padding-bottom: 120px; 
+    }
+
+    /* ==========================================================================
+       2. ANIMACE
+       ========================================================================== */
+    @keyframes slideUp { 
+      from { opacity: 0; transform: translateY(15px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+
+    @keyframes pop { 
+      0% { transform: scale(1); } 
+      50% { transform: scale(1.1); } 
+      100% { transform: scale(1); } 
+    }
+
     @keyframes victoryPulse { 
       0% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
       70% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
       100% { transform: scale(1.1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+
     @keyframes pulseRed { 
       0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
       70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
       100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
-    @keyframes fillUp { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    /* --- 3. HEADER & DYNAMICKÝ COUNTER --- */
-    .header { text-align: center; padding: 25px 20px 10px; position: relative; }
-    h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-    
+    @keyframes fillCircle { 
+      from { transform: scale(0); opacity: 0; } 
+      to { transform: scale(1); opacity: 1; } 
+    }
+
+    /* ==========================================================================
+       3. HEADER A DYNAMICKÝ COUNTER
+       ========================================================================== */
+    .header { 
+      text-align: center; 
+      padding: 30px 20px 15px; 
+      position: relative; 
+    }
+
+    h1 { 
+      font-size: 24px; 
+      font-weight: 800; 
+      letter-spacing: -0.8px; 
+      color: #000;
+    }
+
+    .date-label { 
+      font-size: 13px; 
+      color: #6B7280; 
+      font-weight: 600; 
+      margin-top: 4px; 
+      text-transform: capitalize;
+    }
+
     .counter-badge { 
-      position: absolute; right: 20px; top: 25px; background: white; border-radius: 20px; 
-      padding: 6px 14px; font-size: 14px; font-weight: 800; border: 1px solid #D1D5DB; 
-      display: flex; align-items: center; gap: 6px; 
+      position: absolute; 
+      right: 20px; 
+      top: 30px; 
+      background: white; 
+      border-radius: 20px; 
+      padding: 6px 14px; 
+      font-size: 14px; 
+      font-weight: 800; 
+      border: 1px solid #D1D5DB; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
       transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     }
-    .counter-badge.pending { background: #FEF2F2; color: #EF4444; border-color: #FCA5A5; animation: pulseRed 2s infinite; }
-    .counter-badge.all-done { background: #10B981; color: white; border-color: #10B981; transform: scale(1.1); animation: victoryPulse 2s infinite; }
 
-    /* --- 4. KALENDÁŘ SE ZKRATKAMI --- */
-    .calendar { display: flex; justify-content: space-between; padding: 12px 16px; gap: 6px; }
-    .cal-day { flex: 1; text-align: center; cursor: pointer; border-radius: 14px; padding: 8px 2px; border: 1px solid #D1D5DB; background: white; transition: all 0.2s; }
-    .cal-day.active { border-color: #7C3AED; background: #EDE9FE; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(124,58,237,0.1); }
-    .cal-day .day-label { font-size: 9px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; margin-bottom: 2px; }
-    .cal-day .day-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 14px; font-weight: 800; }
-    .cal-day.active .day-num { background: #7C3AED; color: white; }
+    .counter-badge.pending { 
+      background: #FEF2F2; 
+      color: #EF4444; 
+      border-color: #FCA5A5; 
+      animation: pulseRed 2s infinite; 
+    }
 
-    /* --- 5. PROGRESS CARD --- */
-    .progress-card { background: white; margin: 10px 16px 20px; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; border: 1px solid #D1D5DB; animation: slideUp 0.5s ease; }
-    .ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
-    .ring-wrap svg { transform: rotate(-90deg); width: 72px; height: 72px; }
-    .ring-bg { fill: none; stroke: #F3F4F6; stroke-width: 7; }
-    .ring-fg { fill: none; stroke: #7C3AED; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
-    .ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #000; }
+    .counter-badge.all-done { 
+      background: #10B981; 
+      color: white; 
+      border-color: #10B981; 
+      transform: scale(1.1); 
+      animation: victoryPulse 2s infinite; 
+    }
 
-    /* --- 6. TASKS (Routine & System) --- */
-    .tasks { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
-    .task { border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #D1D5DB; background: white; transition: all 0.3s; opacity: 0; animation: slideUp 0.4s forwards; }
+    /* ==========================================================================
+       4. KALENDÁŘ SE ZKRATKAMI
+       ========================================================================== */
+    .calendar { 
+      display: flex; 
+      justify-content: space-between; 
+      padding: 15px 16px; 
+      gap: 8px; 
+    }
+
+    .cal-day { 
+      flex: 1; 
+      text-align: center; 
+      cursor: pointer; 
+      border-radius: 16px; 
+      padding: 10px 4px; 
+      border: 1px solid #D1D5DB; 
+      background: white; 
+      transition: all 0.2s ease; 
+    }
+
+    .cal-day.active { 
+      border-color: #7C3AED; 
+      background: #EDE9FE; 
+      transform: translateY(-2px); 
+      box-shadow: 0 4px 12px rgba(124,58,237,0.12); 
+    }
+
+    .cal-day .day-label { 
+      font-size: 9px; 
+      font-weight: 800; 
+      color: #9CA3AF; 
+      text-transform: uppercase; 
+      margin-bottom: 3px; 
+    }
+
+    .cal-day .day-num { 
+      width: 30px; 
+      height: 30px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      border-radius: 50%; 
+      margin: 0 auto; 
+      font-size: 14px; 
+      font-weight: 800; 
+    }
+
+    .cal-day.active .day-num { 
+      background: #7C3AED; 
+      color: white; 
+    }
+
+    /* ==========================================================================
+       5. PROGRESS RING
+       ========================================================================== */
+    .progress-card { 
+      background: white; 
+      margin: 10px 16px 25px; 
+      border-radius: 24px; 
+      padding: 20px; 
+      display: flex; 
+      align-items: center; 
+      gap: 18px; 
+      border: 1px solid #D1D5DB; 
+      animation: slideUp 0.5s ease; 
+    }
+
+    .ring-wrap { 
+      position: relative; 
+      width: 72px; 
+      height: 72px; 
+      flex-shrink: 0; 
+    }
+
+    .ring-wrap svg { 
+      transform: rotate(-90deg); 
+      width: 72px; 
+      height: 72px; 
+    }
+
+    .ring-bg { 
+      fill: none; 
+      stroke: #F3F4F6; 
+      stroke-width: 7; 
+    }
+
+    .ring-fg { 
+      fill: none; 
+      stroke: #7C3AED; 
+      stroke-width: 7; 
+      stroke-linecap: round; 
+      transition: stroke-dashoffset 0.8s ease; 
+    }
+
+    .ring-pct { 
+      position: absolute; 
+      inset: 0; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 15px; 
+      font-weight: 900; 
+      color: #000; 
+    }
+
+    /* ==========================================================================
+       6. SEZNAM ÚKOLŮ (TASKS)
+       ========================================================================== */
+    .tasks-container {
+      padding-bottom: 20px;
+    }
+
+    .tasks { 
+      padding: 0 16px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+    }
+
+    .task { 
+      border-radius: 20px; 
+      padding: 16px; 
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      border: 1px solid #D1D5DB; 
+      background: white; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      opacity: 0; 
+      animation: slideUp 0.4s forwards; 
+    }
+
     .task.priority-high { border-left: 6px solid #EF4444; }
     .task.priority-mid { border-left: 6px solid #F59E0B; }
     .task.priority-low { border-left: 6px solid #10B981; }
-    .task.done { opacity: 0.5; transform: scale(0.97); background: #F9FAFB; border-left-color: #D1D5DB; }
-    
-    .task-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #7C3AED; display: grid; place-items: center; cursor: pointer; background: white; flex-shrink: 0; }
-    .task.done .task-check { background: #7C3AED; }
-    .task-check svg { width: 14px; height: 14px; stroke: white; stroke-width: 4; fill: none; display: none; }
-    .task.done .task-check svg { display: block; }
-    .task-info { flex: 1; min-width: 0; }
-    .task-name { font-size: 14px; font-weight: 700; color: #111827; }
 
-    /* --- 7. 🔥 JOURNEY: THE WORLD MAP PATH (Layout Fix) 🔥 --- */
-    #journey-view { display: none; padding: 0 0 100px; }
-    #journey-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; animation: slideUp 0.4s ease; }
-    .hub-card { background: white; border-radius: 24px; padding: 22px 16px; text-align: center; border: 1px solid #D1D5DB; cursor: pointer; transition: 0.2s; }
-    .hub-card:active { transform: scale(0.96); }
-    .hub-icon { font-size: 36px; margin-bottom: 8px; display: block; }
-    .hub-title { font-size: 13px; font-weight: 800; color: #111827; }
+    .task.done { 
+      opacity: 0.5; 
+      transform: scale(0.97); 
+      background: #F9FAFB; 
+      border-left-color: #D1D5DB; 
+    }
 
-    #journey-path { display: none; padding: 16px; animation: slideUp 0.4s ease; }
-    .back-btn { background: #7C3AED; color: white; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 800; margin-bottom: 20px; cursor: pointer; }
+    .task-check { 
+      width: 28px; 
+      height: 28px; 
+      border-radius: 50%; 
+      border: 2.5px solid #7C3AED; 
+      display: grid; 
+      place-items: center; 
+      cursor: pointer; 
+      background: white; 
+      flex-shrink: 0; 
+    }
+
+    .task.done .task-check { 
+      background: #7C3AED; 
+    }
+
+    .task-check svg { 
+      width: 14px; 
+      height: 14px; 
+      stroke: white; 
+      stroke-width: 4; 
+      fill: none; 
+      display: none; 
+    }
+
+    .task.done .task-check svg { 
+      display: block; 
+    }
+
+    .task-info { 
+      flex: 1; 
+      min-width: 0; 
+    }
+
+    .task-name { 
+      font-size: 15px; 
+      font-weight: 700; 
+      color: #111827; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      white-space: nowrap; 
+    }
+
+    .task.done .task-name { 
+      text-decoration: line-through; 
+      color: #9CA3AF; 
+    }
+
+    /* ==========================================================================
+       7. JOURNEY: WORLD MAP DESIGN
+       ========================================================================== */
+    #journey-view { 
+      display: none; 
+      padding: 0 0 120px; 
+    }
+
+    #journey-hub { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 16px; 
+      padding: 16px; 
+      animation: slideUp 0.5s ease; 
+    }
+
+    .hub-card { 
+      background: white; 
+      border-radius: 28px; 
+      padding: 25px 20px; 
+      text-align: center; 
+      border: 1px solid #D1D5DB; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+
+    .hub-card:active { transform: scale(0.95); }
+    .hub-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+    .hub-title { font-size: 14px; font-weight: 800; color: #111827; }
+
+    #journey-path { 
+      display: none; 
+      padding: 16px; 
+      animation: slideUp 0.4s ease; 
+    }
+
+    .back-btn { 
+      background: #7C3AED; 
+      color: white; 
+      border: none; 
+      padding: 12px 20px; 
+      border-radius: 14px; 
+      font-weight: 800; 
+      margin-bottom: 25px; 
+      cursor: pointer; 
+      font-size: 13px;
+    }
 
     .path-container { 
-      position: relative; padding: 40px 0; 
-      display: flex; flex-direction: column-reverse; 
-      align-items: center; min-height: 500px; 
+      position: relative; 
+      padding: 50px 0; 
+      display: flex; 
+      flex-direction: column-reverse; /* Bod 1 je dole, Bod 10 nahoře */
+      align-items: center; 
+      min-height: 600px; 
+    }
+
+    .path-line-base {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 6px;
+      background: #E5E7EB;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      border-radius: 3px;
+    }
+
+    .path-connector { 
+      width: 6px; 
+      height: 70px; 
+      background: #E5E7EB; 
+      margin: -2px 0; 
+      transition: background 0.5s ease; 
+      z-index: 1;
     }
     
-    .path-connector { width: 4px; height: 60px; background: #E5E7EB; margin: -5px 0; transition: background 0.5s; }
-    .path-connector.active { background: #10B981; }
+    .path-connector.active { 
+      background: #10B981; 
+    }
 
-    .path-step { position: relative; z-index: 2; width: 100%; display: flex; justify-content: center; }
-    
-    /* Zig-Zag */
-    .path-step:nth-child(4n+1) { transform: translateX(-65px); }
-    .path-step:nth-child(4n+3) { transform: translateX(65px); }
-    .path-step:nth-child(4n+1) + .path-connector { transform: rotate(-30deg); height: 75px; }
-    .path-step:nth-child(4n+3) + .path-connector { transform: rotate(30deg); height: 75px; }
+    .path-step { 
+      position: relative; 
+      z-index: 2; 
+      width: 100%; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+    }
+
+    /* Zig-Zag Positionierung */
+    .path-step:nth-child(4n+1) { transform: translateX(-70px); }
+    .path-step:nth-child(4n+3) { transform: translateX(70px); }
+    .path-step:nth-child(4n+1) + .path-connector { transform: rotate(-35deg); height: 85px; }
+    .path-step:nth-child(4n+3) + .path-connector { transform: rotate(35deg); height: 85px; }
 
     .step-node { 
-      width: 62px; height: 62px; border-radius: 50%; background: white; border: 4px solid #E5E7EB; 
-      display: grid; place-items: center; font-size: 24px; position: relative; transition: all 0.5s; 
+      width: 65px; 
+      height: 65px; 
+      border-radius: 50%; 
+      background: white; 
+      border: 5px solid #E5E7EB; 
+      display: grid; 
+      place-items: center; 
+      font-size: 26px; 
+      position: relative; 
+      transition: all 0.5s ease; 
     }
-    
-    .path-step.done .step-node { border-color: #10B981; }
+
+    .path-step.done .step-node { 
+      border-color: #10B981; 
+    }
+
     .path-step.done .step-node::before {
-      content: ''; position: absolute; inset: 4px; border-radius: 50%;
-      background: #10B981; animation: fillUp 0.4s forwards;
+      content: ''; 
+      position: absolute; 
+      inset: 4px; 
+      border-radius: 50%;
+      background: #10B981; 
+      animation: fillCircle 0.4s forwards;
+      z-index: 0;
     }
-    .path-step.done .step-node span { position: relative; z-index: 1; }
 
-    /* 🔥 FIX: Text milníku už nezavazí */
+    .path-step.done .step-node span { 
+      position: relative; 
+      z-index: 1; 
+    }
+
+    /* 🔥 FIX: SPACING PRO TEXT MILNÍKU 🔥 */
     .step-info { 
-      position: absolute; top: 50%; transform: translateY(-50%); width: 150px; 
-      text-align: left; pointer-events: none; padding: 0 10px;
+      position: absolute; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      width: 170px; 
+      pointer-events: none; 
     }
-    .path-step:nth-child(4n+1) .step-info { left: 75px; text-align: left; }
-    .path-step:nth-child(4n+3) .step-info { right: 75px; text-align: right; }
-    .path-step:nth-child(odd):not(:nth-child(4n+3)) .step-info { left: 75px; } /* Fallback pro liché */
 
-    .step-info b { display: block; font-size: 12px; color: #111827; line-height: 1.2; }
-    .step-info span { font-size: 10px; color: #9CA3AF; font-weight: 700; margin-top: 2px; display: block; }
+    /* Pokud je bublina vlevo, text dej doprava */
+    .path-step:nth-child(4n+1) .step-info { 
+      left: 85px; 
+      text-align: left; 
+    }
+    /* Pokud je bublina vpravo, text dej doleva */
+    .path-step:nth-child(4n+3) .step-info { 
+      right: 85px; 
+      text-align: right; 
+    }
+    /* Fallback pro středové nebo ostatní body */
+    .path-step:nth-child(even) .step-info { 
+      left: 85px; 
+      text-align: left; 
+    }
 
-    /* --- 8. SYSTEM VIEW (Větší rozestupy) --- */
-    #system-view { display: none; padding: 0 16px 100px; }
-    .sys-info { background: #EDE9FE; padding: 14px; border-radius: 16px; font-size: 12px; color: #5B21B6; font-weight: 600; margin: 10px 0 25px; text-align: center; border: 1px solid #DDD6FE; line-height: 1.4; }
-    
-    /* Větší mezera před tlačítkem */
-    .template-list-container { margin-bottom: 60px; } 
-    .sys-add-btn { width: 100%; padding: 18px; border-radius: 18px; border: 2px dashed #7C3AED; background: #F5F3FF; color: #7C3AED; font-weight: 800; cursor: pointer; transition: 0.2s; }
+    .step-info b { 
+      display: block; 
+      font-size: 13px; 
+      color: #111827; 
+      line-height: 1.2; 
+      font-weight: 800;
+    }
 
-    /* --- 9. TABBAR & FAB --- */
-    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 12px 20px 28px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 100; }
-    .tab { flex: 1; text-align: center; color: #9CA3AF; cursor: pointer; }
-    .tab.active { color: #7C3AED; }
-    .tab span { font-size: 9px; font-weight: 800; text-transform: uppercase; display: block; margin-top: 4px; }
-    
-    .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: #7C3AED; border-radius: 50%; display: grid; place-items: center; color: white; font-size: 30px; box-shadow: 0 6px 16px rgba(124,58,237,0.3); z-index: 90; cursor: pointer; }
+    .step-info span { 
+      font-size: 11px; 
+      color: #9CA3AF; 
+      font-weight: 700; 
+      margin-top: 3px; 
+      display: block; 
+    }
 
-    /* --- 10. MODAL --- */
-    .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: flex-end; backdrop-filter: blur(4px); }
+    /* ==========================================================================
+       8. SYSTEM VIEW (SPACING)
+       ========================================================================== */
+    #system-view { 
+      display: none; 
+      padding: 0 16px 120px; 
+    }
+
+    .sys-info { 
+      background: #EDE9FE; 
+      padding: 16px; 
+      border-radius: 20px; 
+      font-size: 13px; 
+      color: #5B21B6; 
+      font-weight: 600; 
+      margin: 15px 0 30px; 
+      text-align: center; 
+      border: 1px solid #DDD6FE; 
+      line-height: 1.5;
+    }
+
+    .template-list-container { 
+      margin-bottom: 70px; /* Pořádná mezera před tlačítkem */
+    } 
+
+    .sys-add-btn { 
+      width: 100%; 
+      padding: 20px; 
+      border-radius: 20px; 
+      border: 2px dashed #7C3AED; 
+      background: #F5F3FF; 
+      color: #7C3AED; 
+      font-weight: 800; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+    }
+
+    /* ==========================================================================
+       9. TABBAR & FAB
+       ========================================================================== */
+    .tabbar { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: rgba(255,255,255,0.96); 
+      backdrop-filter: blur(12px); 
+      padding: 12px 20px 32px; 
+      display: flex; 
+      justify-content: space-around; 
+      border-top: 1px solid #E5E7EB; 
+      z-index: 100; 
+    }
+
+    .tab { 
+      flex: 1; 
+      text-align: center; 
+      color: #9CA3AF; 
+      cursor: pointer; 
+      transition: all 0.3s ease;
+    }
+
+    .tab.active { 
+      color: #7C3AED; 
+    }
+
+    .tab span { 
+      font-size: 10px; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      display: block; 
+      margin-top: 5px; 
+    }
+
+    .fab { 
+      position: fixed; 
+      bottom: 100px; 
+      right: 20px; 
+      width: 62px; 
+      height: 62px; 
+      background: #7C3AED; 
+      border-radius: 50%; 
+      display: grid; 
+      place-items: center; 
+      color: white; 
+      font-size: 32px; 
+      box-shadow: 0 8px 20px rgba(124,58,237,0.35); 
+      z-index: 90; 
+      cursor: pointer; 
+    }
+
+    /* ==========================================================================
+       10. SMART MODAL
+       ========================================================================== */
+    .add-modal { 
+      display: none; 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(0,0,0,0.45); 
+      z-index: 200; 
+      align-items: flex-end; 
+      backdrop-filter: blur(5px); 
+    }
+
     .add-modal.open { display: flex; }
-    .modal-box { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 35px 20px 45px; animation: slideUp 0.3s ease; position: relative; }
-    .modal-input { width: 100%; padding: 15px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 20px; font-size: 15px; font-weight: 600; }
-    
-    /* Emoji Grid Fix */
-    .icon-grid { display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding: 10px 5px; }
-    .icon-opt { width: 50px; height: 50px; display: grid; place-items: center; font-size: 26px; background: #F3F4F6; border-radius: 15px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: 0.2s; padding-top: 4px; }
-    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
-    
-    .prio-selector { display: flex; gap: 8px; margin-bottom: 30px; }
-    .prio-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #E5E7EB; font-size: 12px; font-weight: 800; text-align: center; cursor: pointer; color: #6B7280; transition: 0.2s; }
+
+    .modal-box { 
+      background: white; 
+      width: 100%; 
+      border-radius: 28px 28px 0 0; 
+      padding: 40px 20px 50px; 
+      animation: slideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+      position: relative; 
+    }
+
+    .close-modal { 
+      position: absolute; 
+      top: 20px; 
+      right: 20px; 
+      width: 36px; 
+      height: 36px; 
+      background: #F3F4F6; 
+      border-radius: 50%; 
+      display: grid; 
+      place-items: center; 
+      color: #9CA3AF; 
+      cursor: pointer; 
+      font-weight: bold;
+    }
+
+    .modal-input { 
+      width: 100%; 
+      padding: 16px; 
+      border-radius: 16px; 
+      border: 2px solid #E5E7EB; 
+      outline: none; 
+      margin-bottom: 25px; 
+      font-size: 16px; 
+      font-weight: 600; 
+    }
+
+    .icon-grid { 
+      display: flex; 
+      gap: 12px; 
+      margin-bottom: 30px; 
+      overflow-x: auto; 
+      padding: 10px 5px 15px; 
+    }
+
+    .icon-opt { 
+      width: 54px; 
+      height: 54px; 
+      display: grid; 
+      place-items: center; 
+      font-size: 28px; 
+      background: #F3F4F6; 
+      border-radius: 16px; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      flex-shrink: 0; 
+      padding-top: 4px; 
+      transition: all 0.2s ease;
+    }
+
+    .icon-opt.selected { 
+      background: #EDE9FE; 
+      border-color: #7C3AED; 
+      transform: scale(1.15); 
+    }
+
+    .prio-selector { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 35px; 
+    }
+
+    .prio-btn { 
+      flex: 1; 
+      padding: 14px; 
+      border-radius: 14px; 
+      border: 2px solid #E5E7EB; 
+      font-size: 12px; 
+      font-weight: 800; 
+      text-align: center; 
+      cursor: pointer; 
+      color: #6B7280; 
+      transition: 0.2s; 
+    }
+
     .prio-btn[data-prio="high"].selected { background: #FEF2F2; color: #EF4444; border-color: #EF4444; }
     .prio-btn[data-prio="mid"].selected { background: #FFFBEB; color: #F59E0B; border-color: #F59E0B; }
     .prio-btn[data-prio="low"].selected { background: #ECFDF5; color: #10B981; border-color: #10B981; }
 
-    .save-btn { width: 100%; background: #7C3AED; color: white; border: none; border-radius: 16px; padding: 18px; font-size: 15px; font-weight: 800; cursor: pointer; }
+    .save-btn { 
+      width: 100%; 
+      background: #7C3AED; 
+      color: white; 
+      border: none; 
+      border-radius: 18px; 
+      padding: 20px; 
+      font-size: 16px; 
+      font-weight: 800; 
+      cursor: pointer; 
+      box-shadow: 0 6px 15px rgba(124,58,237,0.3);
+    }
   </style>
 </head>
 <body>
@@ -173,51 +703,78 @@
         <span id="counter-text">0</span>
       </div>
     </div>
+    
     <div class="calendar" id="calendar"></div>
+    
     <div class="progress-card">
       <div class="ring-wrap">
-        <svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="35"/><circle class="ring-fg" id="ring" cx="40" cy="40" r="35" stroke-dasharray="219.9" stroke-dashoffset="219.9"/></svg>
+        <svg viewBox="0 0 80 80">
+          <circle class="ring-bg" cx="40" cy="40" r="35"/>
+          <circle class="ring-fg" id="ring" cx="40" cy="40" r="35" stroke-dasharray="219.9" stroke-dashoffset="219.9"/>
+        </svg>
         <div class="ring-pct" id="pct-text">0%</div>
       </div>
-      <div style="flex:1"><h2>Tvůj progres</h2><p id="progress-sub" style="font-size:12px;color:#666">0 z 0 hotovo</p></div>
+      <div style="flex:1">
+        <h2>Denní progres</h2>
+        <p id="progress-sub" style="font-size:12px;color:#666">0 z 0 hotovo</p>
+      </div>
     </div>
-    <div class="tasks" id="task-list"></div>
+    
+    <div class="tasks-container">
+      <div class="tasks" id="task-list"></div>
+    </div>
   </div>
 
   <div id="journey-view">
-    <div class="header"><h1>Skill Maps</h1><p class="date-label">Vybruš své dovednosti</p></div>
+    <div class="header">
+      <h1>Skill Maps</h1>
+      <p class="date-label">Dosáhni nových vrcholů</p>
+    </div>
+    
     <div id="journey-hub"></div>
+    
     <div id="journey-path">
-      <button class="back-btn" onclick="closeJourneyDetail()">← Zpět na výběr</button>
+      <button class="back-btn" onclick="closeJourneyDetail()">← Zpět na rozcestí</button>
       <div class="path-container" id="path-steps-list"></div>
     </div>
   </div>
 
   <div id="system-view">
-    <div class="header"><h1>Master System</h1><p class="date-label">Spawn Logic (4:00)</p></div>
-    <div class="sys-info">Tyto úkoly se každé ráno samy vytvoří. Šetři svoji energii na to, co je důležité.</div>
+    <div class="header">
+      <h1>Master System</h1>
+      <p class="date-label">Automatické rituály ve 4:00</p>
+    </div>
+    <div class="sys-info">Nastav si úkoly, které se ti každé ráno samy vytvoří. Šetři svoji mentální kapacitu.</div>
     <div class="template-list-container" id="template-list"></div>
     <button class="sys-add-btn" onclick="openModal('template')">+ Přidat ranní rituál</button>
   </div>
 
   <div class="fab" onclick="openModal('task')">+</div>
+  
   <div class="tabbar">
-    <div class="tab active" id="tab-routine" onclick="showView('routine')">🏠<span>Routine</span></div>
-    <div class="tab" id="tab-journey" onclick="showView('journey')">🗺️<span>Journey</span></div>
-    <div class="tab" id="tab-system" onclick="showView('system')">⚙️<span>System</span></div>
+    <div class="tab active" id="tab-routine" onclick="showView('routine')">
+      <span style="font-size:22px">🏠</span><span>Routine</span>
+    </div>
+    <div class="tab" id="tab-journey" onclick="showView('journey')">
+      <span style="font-size:22px">🗺️</span><span>Journey</span>
+    </div>
+    <div class="tab" id="tab-system" onclick="showView('system')">
+      <span style="font-size:22px">⚙️</span><span>System</span>
+    </div>
   </div>
 </div>
 
 <div class="add-modal" id="add-modal">
   <div class="modal-box">
-    <div style="position:absolute;top:15px;right:15px;color:#AAA;" onclick="closeModal()">✕</div>
-    <h3 id="modal-title" style="margin-bottom:15px;font-size:17px;">Nový úkol</h3>
+    <div class="close-modal" onclick="closeModal()">✕</div>
+    <h3 id="modal-title" style="margin-bottom:15px; font-size:18px;">Nový úkol</h3>
     
     <input id="task-input" class="modal-input" placeholder="Co tě čeká?" autocomplete="off">
     
+    <p style="font-size:11px;color:#999;margin-bottom:10px;text-transform:uppercase;font-weight:800;letter-spacing:1px;">Vyber ikonu & kategorii</p>
     <div class="icon-grid" id="icon-picker"></div>
     
-    <p style="font-size:11px;color:#999;margin-bottom:10px;text-transform:uppercase;font-weight:800;">Priorita</p>
+    <p style="font-size:11px;color:#999;margin-bottom:10px;text-transform:uppercase;font-weight:800;letter-spacing:1px;">Priorita úkolu</p>
     <div class="prio-selector">
       <div class="prio-btn" data-prio="low">LOW</div>
       <div class="prio-btn selected" data-prio="mid">MID</div>
@@ -229,48 +786,64 @@
 </div>
 
 <script>
-/* --- DATA --- */
-let tasks = JSON.parse(localStorage.getItem('myRPG_v24_tasks')) || [];
-let templates = JSON.parse(localStorage.getItem('myRPG_v24_temps')) || [
-  { name: "Práce na automatizaci", priority: "high", icon: "💻" },
-  { name: "Trénink", priority: "mid", icon: "💪" }
+/* --- A. DATA & STATE --- */
+let tasks = JSON.parse(localStorage.getItem('myRPG_v26_tasks')) || [];
+let templates = JSON.parse(localStorage.getItem('myRPG_v26_temps')) || [
+  { name: "Ledová sprcha", priority: "high", icon: "💪" },
+  { name: "Práce na scénáři", priority: "high", icon: "💻" },
+  { name: "Čtení knihy", priority: "mid", icon: "📚" }
 ];
-let lastResetDate = localStorage.getItem('lastResetDate_v24') || "";
+let lastResetDate = localStorage.getItem('lastResetDate_v26') || "";
 
-const icons = ["💪", "💻", "📚", "💧", "💸", "🏃‍♂️", "🎯", "🔥", "🍳"];
+const icons = ["💪", "💻", "📚", "💧", "💸", "🏃‍♂️", "🎯", "🔥", "🍳", "🧘‍♂️"];
 const milestones = [
-  { cat: "💪", title: "Nováček", target: 1 },
+  { cat: "💪", title: "První krok", target: 1 },
   { cat: "💪", title: "Pravidelný dříč", target: 10 },
-  { cat: "💪", title: "Bestie", target: 50 },
-  { cat: "💻", title: "První kód", target: 1 },
-  { cat: "💻", title: "Developer", target: 15 },
-  { cat: "💻", title: "Make God", target: 100 },
+  { cat: "💪", title: "Železný Grizzly", target: 50 },
+  { cat: "💻", title: "Hello World", target: 1 },
+  { cat: "💻", title: "Automatizátor", target: 15 },
+  { cat: "💻", title: "Make Master", target: 70 },
+  { cat: "💻", title: "System Architect", target: 150 },
   { cat: "📚", title: "Student", target: 5 },
-  { cat: "💧", title: "Hydratace", target: 14 }
+  { cat: "📚", title: "Knihomol", target: 25 },
+  { cat: "💧", title: "Základ zdraví", target: 14 }
 ];
-const catNames = {"💪":"Fitness","💻":"Developer","📚":"Mindset","💧":"Zdraví","💸":"Money","🎯":"Cíle"};
+const catNames = {"💪":"Fitness","💻":"Developer","📚":"Mindset","💧":"Zdraví","💸":"Money","🎯":"Cíle","🍳":"Strava","🧘‍♂️":"Mentál"};
 
 let selectedDay = new Date().getDate();
 let currentIcon = "💪";
 let selectedPriority = "mid";
 let modalMode = 'task';
 
+/* --- B. LOGIKA SYSTÉMU --- */
 function save() { 
-  localStorage.setItem('myRPG_v24_tasks', JSON.stringify(tasks)); 
-  localStorage.setItem('myRPG_v24_temps', JSON.stringify(templates)); 
+  localStorage.setItem('myRPG_v26_tasks', JSON.stringify(tasks)); 
+  localStorage.setItem('myRPG_v26_temps', JSON.stringify(templates)); 
 }
 
 function checkAutoReset() { 
   const now = new Date(); 
-  if (lastResetDate !== now.toDateString() && now.getHours() >= 4) { 
-    templates.forEach(t => tasks.push({ id: Date.now()+Math.random(), name:t.name, icon:t.icon, priority:t.priority, done:false, date:now.getDate() })); 
-    localStorage.setItem('lastResetDate_v24', now.toDateString()); 
-    lastResetDate=now.toDateString(); save(); 
+  const todayStr = now.toDateString();
+  if (lastResetDate !== todayStr && now.getHours() >= 4) { 
+    templates.forEach(t => tasks.push({ 
+      id: Date.now() + Math.random(), 
+      name: t.name, 
+      icon: t.icon, 
+      priority: t.priority, 
+      done: false, 
+      date: now.getDate() 
+    })); 
+    localStorage.setItem('lastResetDate_v26', todayStr); 
+    lastResetDate = todayStr; 
+    save(); 
   } 
 }
 
+/* --- C. RENDERING --- */
 function render() {
-  const list = document.getElementById("task-list"); list.innerHTML = "";
+  const list = document.getElementById("task-list"); 
+  list.innerHTML = "";
+  
   const todays = tasks.filter(t => t.date === selectedDay);
   const weight = { high: 1, mid: 2, low: 3 };
   todays.sort((a,b) => a.done - b.done || weight[a.priority] - weight[b.priority]);
@@ -280,10 +853,15 @@ function render() {
     el.className = `task priority-${t.priority||'mid'} ${t.done?'done':''}`;
     el.style.animationDelay = (i * 0.04) + 's';
     el.innerHTML = `
-      <div class="task-check" onclick="toggleTask(${t.id})"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="task-check" onclick="toggleTask(${t.id})">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
       <div style="font-size:22px;">${t.icon}</div>
-      <div class="task-info" onclick="toggleTask(${t.id})"><div class="task-name">${t.name}</div></div>
-      <div onclick="removeTask(${t.id})" style="color:#DDD">✕</div>`;
+      <div class="task-info" onclick="toggleTask(${t.id})">
+        <div class="task-name">${t.name}</div>
+      </div>
+      <div onclick="removeTask(${t.id})" style="color:#DDD; font-size:18px; padding-left:5px;">✕</div>
+    `;
     list.appendChild(el);
   });
 
@@ -295,25 +873,40 @@ function render() {
   document.getElementById("ring").style.strokeDashoffset = 219.9 - (pct/100)*219.9;
   document.getElementById("progress-sub").innerText = `${doneCount} z ${todays.length} hotovo`;
   
+  // DYNAMICKÝ BADGE (V26 Fix)
   const badge = document.getElementById("main-counter");
   document.getElementById("counter-text").innerText = remaining;
   if (todays.length > 0) {
     badge.className = remaining > 0 ? "counter-badge pending" : "counter-badge all-done";
-  } else { badge.className = "counter-badge"; }
+  } else { 
+    badge.className = "counter-badge"; 
+  }
 
-  const tList = document.getElementById("template-list"); tList.innerHTML = "";
+  // System templates
+  const tList = document.getElementById("template-list"); 
+  tList.innerHTML = "";
   templates.forEach((t, i) => {
-    const el = document.createElement("div"); el.className=`task priority-${t.priority}`;
-    el.innerHTML = `<div style="font-size:20px;">${t.icon}</div><div class="task-info"><b>${t.name}</b></div><div onclick="removeTemplate(${i})" style="color:#DDD">✕</div>`;
+    const el = document.createElement("div"); 
+    el.className = `task priority-${t.priority}`;
+    el.innerHTML = `
+      <div style="font-size:20px;">${t.icon}</div>
+      <div class="task-info"><b>${t.name}</b></div>
+      <div onclick="removeTemplate(${i})" style="color:#DDD; font-size:18px;">✕</div>
+    `;
     tList.appendChild(el);
   });
+
   renderJourneyHub();
 }
 
 function renderJourneyHub() {
-  const hub = document.getElementById("journey-hub"); hub.innerHTML = "";
-  [...new Set(milestones.map(m => m.cat))].forEach(cat => {
-    const card = document.createElement("div"); card.className = "hub-card";
+  const hub = document.getElementById("journey-hub"); 
+  hub.innerHTML = "";
+  const categories = [...new Set(milestones.map(m => m.cat))];
+  
+  categories.forEach(cat => {
+    const card = document.createElement("div"); 
+    card.className = "hub-card";
     card.onclick = () => openJourneyPath(cat);
     card.innerHTML = `<span class="hub-icon">${cat}</span><span class="hub-title">${catNames[cat] || 'Skill'}</span>`;
     hub.appendChild(card);
@@ -323,55 +916,77 @@ function renderJourneyHub() {
 function openJourneyPath(cat) {
   document.getElementById("journey-hub").style.display="none"; 
   document.getElementById("journey-path").style.display="block";
-  const list = document.getElementById("path-steps-list"); list.innerHTML = "";
+  const list = document.getElementById("path-steps-list"); 
+  list.innerHTML = "";
+  
   const catMilestones = milestones.filter(m => m.cat === cat);
   const score = tasks.filter(t => t.done && t.icon === cat).length;
 
   catMilestones.forEach((m, i) => {
     const isDone = score >= m.target;
     const cappedScore = Math.min(score, m.target);
+
     if (i > 0) {
       const conn = document.createElement("div"); 
       conn.className = `path-connector ${isDone ? 'active' : ''}`;
       list.appendChild(conn);
     }
+
     const step = document.createElement("div"); 
     step.className = `path-step ${isDone ? 'done' : ''}`;
-    step.innerHTML = `<div class="step-node"><span>${isDone ? cat : '🔒'}</span></div><div class="step-info"><b>${m.title}</b><span>${cappedScore}/${m.target} splněno</span></div>`;
+    step.innerHTML = `
+      <div class="step-node"><span>${isDone ? cat : '🔒'}</span></div>
+      <div class="step-info">
+        <b>${m.title}</b>
+        <span>${cappedScore}/${m.target} splněno</span>
+      </div>
+    `;
     list.appendChild(step);
     
-    if (isDone && !localStorage.getItem('ach_v24_' + m.title)) {
+    if (isDone && !localStorage.getItem('m_v26_' + m.title)) {
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-      localStorage.setItem('ach_v24_' + m.title, 'true');
+      localStorage.setItem('m_v26_' + m.title, 'true');
     }
   });
 }
 
-/* --- UI HELPERS --- */
-function closeJourneyDetail() { document.getElementById("journey-hub").style.display="grid"; document.getElementById("journey-path").style.display="none"; }
-function showView(v) { ['routine','journey','system'].forEach(id => document.getElementById(id+'-view').style.display = (id===v?'block':'none')); document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+v).classList.add('active'); if(v==='journey') closeJourneyDetail(); }
+/* --- D. UI HELPERS --- */
+function closeJourneyDetail() { 
+  document.getElementById("journey-hub").style.display="grid"; 
+  document.getElementById("journey-path").style.display="none"; 
+}
+
+function showView(v) { 
+  ['routine','journey','system'].forEach(id => document.getElementById(id+'-view').style.display = (id===v?'block':'none')); 
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); 
+  document.getElementById('tab-'+v).classList.add('active'); 
+  if(v==='journey') closeJourneyDetail(); 
+}
 
 function buildCalendar() { 
-  const cal = document.getElementById("calendar"); cal.innerHTML = ""; 
+  const cal = document.getElementById("calendar"); 
+  cal.innerHTML = ""; 
   const daysAbbr = ["PO","ÚT","ST","ČT","PÁ","SO","NE"];
   const nums = [20,21,22,23,24,25,26]; 
   nums.forEach((n, i) => { 
-    const d = document.createElement("div"); d.className = "cal-day" + (n === selectedDay ? " active" : ""); 
+    const d = document.createElement("div"); 
+    d.className = "cal-day" + (n === selectedDay ? " active" : ""); 
     d.innerHTML = `<div class="day-label">${daysAbbr[i]}</div><div class="day-num">${n}</div>`; 
     d.onclick = () => { selectedDay = n; buildCalendar(); render(); }; 
     cal.appendChild(d); 
   }); 
-  document.getElementById("date-label").innerText = `${selectedDay} April 2026`; 
+  document.getElementById("date-label").innerText = `${selectedDay}. Duben 2026`; 
 }
 
 function openModal(mode) {
   modalMode = mode;
   document.getElementById("add-modal").classList.add("open");
   
-  // 🔥 DYNAMICKÝ NADPIS MODALU
-  document.getElementById("modal-title").innerText = mode === 'task' ? "Nový úkol na dnes" : "Nový ranní rituál";
+  // DYNAMICKÝ NADPIS
+  document.getElementById("modal-title").innerText = (mode === 'task') ? "Nový úkol na dnes" : "Nový ranní rituál";
   
-  const picker = document.getElementById("icon-picker"); picker.innerHTML = "";
+  const picker = document.getElementById("icon-picker"); 
+  picker.innerHTML = "";
   icons.forEach(icon => {
     const opt = document.createElement("div");
     opt.className = "icon-opt" + (currentIcon === icon ? " selected" : "");
@@ -394,16 +1009,25 @@ document.querySelectorAll(".prio-btn").forEach(btn => {
 document.getElementById("modal-save-btn").onclick = () => {
   const val = document.getElementById("task-input").value;
   if (!val) return;
-  if (modalMode === 'task') tasks.push({ id: Date.now(), name: val, icon: currentIcon, priority: selectedPriority, done: false, date: selectedDay });
-  else templates.push({ name: val, icon: currentIcon, priority: selectedPriority });
-  save(); render(); closeModal(); document.getElementById("task-input").value = "";
+  if (modalMode === 'task') {
+    tasks.push({ id: Date.now(), name: val, icon: currentIcon, priority: selectedPriority, done: false, date: selectedDay });
+  } else {
+    templates.push({ name: val, icon: currentIcon, priority: selectedPriority });
+  }
+  save(); 
+  render(); 
+  closeModal(); 
+  document.getElementById("task-input").value = "";
 };
 
 function toggleTask(id) { const t = tasks.find(x => x.id === id); t.done = !t.done; save(); render(); }
 function removeTask(id) { tasks = tasks.filter(x => x.id !== id); save(); render(); }
 function removeTemplate(i) { templates.splice(i, 1); save(); render(); }
 
-checkAutoReset(); buildCalendar(); render();
+/* --- E. START --- */
+checkAutoReset(); 
+buildCalendar(); 
+render();
 </script>
 </body>
 </html>
