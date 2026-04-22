@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine System v12 - iOS Fix V2</title>
+  <title>Routine System v13 - Big Box Fix</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F0EEF8; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -71,8 +71,7 @@
     .timeline-center::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #D1D5DB; transform: translateX(-50%); border-radius: 2px; }
     .tc-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; position: relative; opacity: 0; animation: slideUp 0.4s forwards; }
     .tc-item:nth-child(even) { flex-direction: row-reverse; }
-    .tc-content { width: 42%; background: white; padding: 14px 12px; border-radius: 16px; border: 1px solid #D1D5DB; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.3s; cursor: pointer; }
-    .tc-content:active { transform: scale(0.95); }
+    .tc-content { width: 42%; background: white; padding: 14px 12px; border-radius: 16px; border: 1px solid #D1D5DB; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.3s; }
     .tc-content .icon { font-size: 26px; margin-bottom: 6px; display: block; transition: transform 0.3s; }
     .tc-item:not(.done):hover .icon { transform: translateY(-3px); }
     .tc-content .name { font-size: 13px; font-weight: 800; color: #000; }
@@ -107,38 +106,39 @@
     .close-modal { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; transition: 0.2s; }
     .close-modal:active { transform: scale(0.9); background: #E5E7EB; }
 
-    .modal-box input { width: 100%; font-size: 16px; padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 20px; background: #F9FAFB; transition: border-color 0.2s; }
+    .modal-box input { width: 100%; font-size: 16px; padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 24px; background: #F9FAFB; transition: border-color 0.2s; }
     .modal-box input:focus { border-color: #7C3AED; background: white; }
     
-    .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .icon-grid { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 5px; }
+    /* 🔥 OPRAVA PROSTORU KOLEM EMOJI 🔥 */
+    .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; } /* Větší mezera pod nadpisem */
     
-    /* 🔥 APPLE IOS EMOJI HACK V2 🔥 */
+    .icon-grid { 
+      display: flex; gap: 12px; margin-bottom: 28px; overflow-x: auto; 
+      padding: 6px 6px 14px 6px; /* Větší padding, aby zvětšená ikonka neuřízla stín/okraj */
+    }
+    
     .icon-opt { 
-      width: 48px; 
-      height: 48px; 
+      width: 52px; /* Zvětšená krabička */
+      height: 52px; /* Zvětšená krabička */
       display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      font-size: 28px; /* O něco větší, aby hezky vyplnil box */
+      align-items: center; justify-content: center; 
+      font-size: 26px; 
       background: #F3F4F6; 
-      border-radius: 14px; 
+      border-radius: 16px; 
       cursor: pointer; 
       border: 2px solid transparent; 
       flex-shrink: 0; 
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1); 
-      padding-top: 4px; /* Tohle ten Apple emoji srazí vizuálně doprostřed! */
-      -webkit-user-select: none;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
     }
-    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
+    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.15); box-shadow: 0 4px 10px rgba(124,58,237,0.2); }
     
-    .priority-selector { display: flex; gap: 10px; margin-bottom: 28px; }
-    .prio-btn { flex: 1; padding: 12px; border-radius: 14px; border: 2px solid #E5E7EB; font-size: 13px; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.2s; color: #6B7280; }
+    .priority-selector { display: flex; gap: 10px; margin-bottom: 32px; }
+    .prio-btn { flex: 1; padding: 14px; border-radius: 14px; border: 2px solid #E5E7EB; font-size: 13px; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.2s; color: #6B7280; }
     .prio-btn[data-prio="high"].selected { background: #FEF2F2; color: #EF4444; border-color: #EF4444; }
     .prio-btn[data-prio="mid"].selected { background: #FFFBEB; color: #F59E0B; border-color: #F59E0B; }
     .prio-btn[data-prio="low"].selected { background: #ECFDF5; color: #10B981; border-color: #10B981; }
     
-    .modal-add-btn { width: 100%; background: #7C3AED; color: white; border: none; border-radius: 16px; padding: 16px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
+    .modal-add-btn { width: 100%; background: #7C3AED; color: white; border: none; border-radius: 16px; padding: 18px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
     .modal-add-btn:active { transform: scale(0.98); background: #6D28D9; }
   </style>
 </head>
@@ -371,6 +371,8 @@ function openTemplateModal() {
   document.getElementById("add-modal").classList.add("open"); 
   setTimeout(() => document.getElementById("task-input").focus(), 100); 
 }
+
+document.getElementById("add-modal").onclick = e => { if(e.target.id === "add-modal") closeModal(); };
 
 document.querySelectorAll(".icon-opt").forEach(b => b.onclick = e => { document.querySelectorAll(".icon-opt").forEach(x => x.classList.remove("selected")); e.currentTarget.classList.add("selected"); currentIcon = e.currentTarget.dataset.icon; });
 document.querySelectorAll(".prio-btn").forEach(btn => { btn.onclick = () => { document.querySelectorAll(".prio-btn").forEach(x => x.classList.remove("selected")); btn.classList.add("selected"); selectedPriority = btn.dataset.prio; }; });
