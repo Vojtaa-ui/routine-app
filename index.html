@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine System v10 - Gamified</title>
+  <title>Routine System v11 - iOS Fix</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F0EEF8; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -62,7 +62,6 @@
     .task-check svg { display: none; width: 14px; height: 14px; stroke: white; stroke-width: 3; fill: none; }
     .task.done .task-check svg { display: block; animation: pop 0.3s ease; }
 
-    /* Journey View */
     #journey-view { display: none; padding-bottom: 120px; }
     .journey-header { text-align: center; padding: 20px; animation: slideUp 0.4s forwards; }
     .journey-header h2 { font-size: 24px; font-weight: 800; color: #000; }
@@ -77,7 +76,6 @@
     .tc-item:not(.done):hover .icon { transform: translateY(-3px); }
     .tc-content .name { font-size: 13px; font-weight: 800; color: #000; }
     
-    /* Nový Progress tag pro Journey */
     .ms-progress { font-size: 11px; font-weight: 800; color: #7C3AED; background: #EDE9FE; padding: 4px 10px; border-radius: 12px; margin-top: 8px; display: inline-block; transition: all 0.3s; }
     .tc-item.done .ms-progress { color: #065F46; background: #A7F3D0; }
 
@@ -86,13 +84,11 @@
     .tc-item.done .tc-content { background: #F0FDF4; border-color: #86EFAC; opacity: 0.8; }
     .tc-item.done .tc-content .name { color: #065F46; }
 
-    /* System View */
     #system-view { display: none; padding: 20px 16px 120px; }
     .sys-info { background: #EDE9FE; padding: 14px; border-radius: 16px; font-size: 13px; color: #5B21B6; font-weight: 600; margin-bottom: 24px; text-align: center; animation: slideUp 0.4s ease forwards; border: 1px solid #DDD6FE; line-height: 1.4; }
     .sys-add-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px dashed #C4B5FD; background: #F5F3FF; font-weight: 800; color: #7C3AED; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
     .sys-add-btn:active { transform: scale(0.98); background: #EDE9FE; }
 
-    /* FAB & Tabbar */
     .fab { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; background: #7C3AED; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(124,58,237,0.4); z-index: 50; transition: transform 0.2s; }
     .fab:active { transform: scale(0.9); }
     .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 20px 24px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 40; box-shadow: 0 -10px 20px rgba(0,0,0,0.03); }
@@ -102,7 +98,6 @@
     .tab.active svg { transform: scale(1.1); }
     .tab span { font-size: 11px; font-weight: 700; }
 
-    /* Modal Styling */
     .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
     .add-modal.open { display: flex; opacity: 1; }
     .modal-box { position: relative; background: white; border-radius: 24px 24px 0 0; padding: 32px 20px 40px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
@@ -117,7 +112,22 @@
     .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .icon-grid { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 5px; }
     
-    .icon-opt { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; background: #F3F4F6; border-radius: 14px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1); }
+    /* 🔥 APPLE IOS EMOJI HACK 🔥 */
+    .icon-opt { 
+      width: 46px; 
+      height: 46px; 
+      display: grid; /* Grid místo flexu je na iOS přesnější */
+      place-items: center; 
+      font-size: 26px; 
+      background: #F3F4F6; 
+      border-radius: 14px; 
+      cursor: pointer; 
+      border: 2px solid transparent; 
+      flex-shrink: 0; 
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1); 
+      padding-bottom: 3px; /* Hack na posunutí iOS baselinu */
+      -webkit-user-select: none; /* Zabraňuje probliknutí textu při kliku */
+    }
     .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
     
     .priority-selector { display: flex; gap: 10px; margin-bottom: 28px; }
@@ -204,7 +214,6 @@ let templates = JSON.parse(localStorage.getItem('myDailyTemplates')) || [
   { name: "Pít 0.5l vody", priority: "mid", icon: "💧" }
 ];
 
-// 🔥 NOVINKA: Databáze milníků (můžeš si je pak libovolně přepsat)
 let milestones = [
   { title: "První trénink", target: 1, icon: "💪" },
   { title: "5 Tréninků", target: 5, icon: "💪" },
@@ -257,7 +266,6 @@ function render() {
   const journey = document.getElementById("journey-timeline"); journey.innerHTML = "";
   const tempDom = document.getElementById("template-list"); tempDom.innerHTML = "";
   
-  // -- VYKRESLENÍ ROUTINE (Dnešek) --
   let todays = tasks.filter(t => t.date === selectedDay);
   const prioWeight = { 'high': 1, 'mid': 2, 'low': 3 };
   todays.sort((a, b) => {
@@ -282,14 +290,12 @@ function render() {
     list.appendChild(el);
   });
 
-  // -- 🔥 VYKRESLENÍ JOURNEY (Historické milníky) 🔥 --
-  const allHistoryDone = tasks.filter(t => t.done); // Všechny hotové úkoly napříč historií
+  const allHistoryDone = tasks.filter(t => t.done);
   
   milestones.forEach((m, i) => {
-    // Spočítáme, kolikrát jsi historicky splnil úkol s danou ikonou
     const currentScore = allHistoryDone.filter(t => t.icon === m.icon).length;
     const isDone = currentScore >= m.target;
-    const displayCount = currentScore > m.target ? m.target : currentScore; // Aby to neukazovalo třeba 25/20
+    const displayCount = currentScore > m.target ? m.target : currentScore;
 
     const jel = document.createElement("div"); 
     jel.className = "tc-item" + (isDone ? " done" : "");
@@ -306,7 +312,6 @@ function render() {
     journey.appendChild(jel);
   });
 
-  // -- VYKRESLENÍ SYSTEM (Šablony) --
   templates.forEach((temp, i) => {
     const tel = document.createElement("div"); tel.className = `task priority-${temp.priority}`;
     tel.style.animationDelay = `${i * 0.05}s`;
@@ -321,7 +326,6 @@ function render() {
     tempDom.appendChild(tel);
   });
 
-  // Update Progress Baru pro DNEŠEK
   const done = todays.filter(t => t.done).length, total = todays.length;
   const pct = total ? Math.round((done / total) * 100) : 0;
   document.getElementById("ring").style.strokeDashoffset = CIRC - (pct/100)*CIRC;
