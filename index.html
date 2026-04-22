@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine System v8</title>
+  <title>Routine System v10 - Gamified</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F0EEF8; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -62,6 +62,7 @@
     .task-check svg { display: none; width: 14px; height: 14px; stroke: white; stroke-width: 3; fill: none; }
     .task.done .task-check svg { display: block; animation: pop 0.3s ease; }
 
+    /* Journey View */
     #journey-view { display: none; padding-bottom: 120px; }
     .journey-header { text-align: center; padding: 20px; animation: slideUp 0.4s forwards; }
     .journey-header h2 { font-size: 24px; font-weight: 800; color: #000; }
@@ -71,21 +72,27 @@
     .timeline-center::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #D1D5DB; transform: translateX(-50%); border-radius: 2px; }
     .tc-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; position: relative; opacity: 0; animation: slideUp 0.4s forwards; }
     .tc-item:nth-child(even) { flex-direction: row-reverse; }
-    .tc-content { width: 42%; background: white; padding: 14px 12px; border-radius: 16px; border: 1px solid #D1D5DB; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.3s; cursor: pointer; }
-    .tc-content:active { transform: scale(0.95); }
+    .tc-content { width: 42%; background: white; padding: 14px 12px; border-radius: 16px; border: 1px solid #D1D5DB; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.3s; }
     .tc-content .icon { font-size: 26px; margin-bottom: 6px; display: block; transition: transform 0.3s; }
     .tc-item:not(.done):hover .icon { transform: translateY(-3px); }
-    .tc-content .name { font-size: 13px; font-weight: 700; color: #000; }
+    .tc-content .name { font-size: 13px; font-weight: 800; color: #000; }
+    
+    /* Nový Progress tag pro Journey */
+    .ms-progress { font-size: 11px; font-weight: 800; color: #7C3AED; background: #EDE9FE; padding: 4px 10px; border-radius: 12px; margin-top: 8px; display: inline-block; transition: all 0.3s; }
+    .tc-item.done .ms-progress { color: #065F46; background: #A7F3D0; }
+
     .tc-dot { width: 24px; height: 24px; background: #F0EEF8; border: 4px solid #D1D5DB; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 2; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .tc-item.done .tc-dot { background: #10B981; border-color: #A7F3D0; transform: translateX(-50%) scale(1.2); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
     .tc-item.done .tc-content { background: #F0FDF4; border-color: #86EFAC; opacity: 0.8; }
-    .tc-item.done .tc-content .name { color: #065F46; text-decoration: line-through; }
+    .tc-item.done .tc-content .name { color: #065F46; }
 
+    /* System View */
     #system-view { display: none; padding: 20px 16px 120px; }
     .sys-info { background: #EDE9FE; padding: 14px; border-radius: 16px; font-size: 13px; color: #5B21B6; font-weight: 600; margin-bottom: 24px; text-align: center; animation: slideUp 0.4s ease forwards; border: 1px solid #DDD6FE; line-height: 1.4; }
     .sys-add-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px dashed #C4B5FD; background: #F5F3FF; font-weight: 800; color: #7C3AED; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
     .sys-add-btn:active { transform: scale(0.98); background: #EDE9FE; }
 
+    /* FAB & Tabbar */
     .fab { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; background: #7C3AED; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(124,58,237,0.4); z-index: 50; transition: transform 0.2s; }
     .fab:active { transform: scale(0.9); }
     .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 20px 24px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 40; box-shadow: 0 -10px 20px rgba(0,0,0,0.03); }
@@ -95,13 +102,12 @@
     .tab.active svg { transform: scale(1.1); }
     .tab span { font-size: 11px; font-weight: 700; }
 
-    /* Modal Styling - OPRAVENO */
+    /* Modal Styling */
     .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
     .add-modal.open { display: flex; opacity: 1; }
     .modal-box { position: relative; background: white; border-radius: 24px 24px 0 0; padding: 32px 20px 40px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
     .add-modal.open .modal-box { transform: translateY(0); }
     
-    /* Křížek na zavření */
     .close-modal { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; transition: 0.2s; }
     .close-modal:active { transform: scale(0.9); background: #E5E7EB; }
 
@@ -111,9 +117,8 @@
     .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .icon-grid { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 5px; }
     
-    /* OPRAVA EMOJI BOXŮ: Používáme box-shadow místo border, aby to nedeformovalo layout */
-    .icon-opt { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #F3F4F6; border-radius: 14px; cursor: pointer; flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 0 2px transparent; }
-    .icon-opt.selected { background: #EDE9FE; transform: scale(1.15); box-shadow: 0 0 0 2px #7C3AED; }
+    .icon-opt { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 26px; line-height: 1; background: #F3F4F6; border-radius: 14px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1); }
+    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
     
     .priority-selector { display: flex; gap: 10px; margin-bottom: 28px; }
     .prio-btn { flex: 1; padding: 12px; border-radius: 14px; border: 2px solid #E5E7EB; font-size: 13px; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.2s; color: #6B7280; }
@@ -146,7 +151,7 @@
   </div>
 
   <div id="journey-view">
-    <div class="journey-header"><h2>My Journey</h2><p>Cesta tvými dnešními milníky</p></div>
+    <div class="journey-header"><h2>My Journey</h2><p>Odemykej milníky plněním denních úkolů</p></div>
     <div class="timeline-center" id="journey-timeline"></div>
   </div>
 
@@ -171,7 +176,7 @@
     <div class="close-modal" onclick="closeModal()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
     
     <input id="task-input" placeholder="Co tě čeká?" autocomplete="off" />
-    <div class="selector-title">IKONA</div>
+    <div class="selector-title">IKONA (Kategorie Journey)</div>
     <div class="icon-grid" id="icon-picker">
       <div class="icon-opt selected" data-icon="💪">💪</div>
       <div class="icon-opt" data-icon="🏃‍♂️">🏃‍♂️</div>
@@ -198,13 +203,22 @@ let templates = JSON.parse(localStorage.getItem('myDailyTemplates')) || [
   { name: "Ranní meditace", priority: "high", icon: "🧘‍♂️" },
   { name: "Pít 0.5l vody", priority: "mid", icon: "💧" }
 ];
-let lastReset = localStorage.getItem('lastResetDate') || "";
 
+// 🔥 NOVINKA: Databáze milníků (můžeš si je pak libovolně přepsat)
+let milestones = [
+  { title: "První trénink", target: 1, icon: "💪" },
+  { title: "5 Tréninků", target: 5, icon: "💪" },
+  { title: "Knihomol: 3 dny čtení", target: 3, icon: "📚" },
+  { title: "Konzistence: 20 Tréninků", target: 20, icon: "💪" },
+  { title: "Hydratace", target: 10, icon: "💧" },
+  { title: "Make.com Developer", target: 15, icon: "💻" }
+];
+
+let lastReset = localStorage.getItem('lastResetDate') || "";
 const CIRC = 2 * Math.PI * 29;
 let selectedDay = new Date().getDate(); 
 let currentIcon = "💪"; 
 let selectedPriority = "mid";
-
 let modalMode = 'task'; 
 
 function checkAutoReset() {
@@ -243,6 +257,7 @@ function render() {
   const journey = document.getElementById("journey-timeline"); journey.innerHTML = "";
   const tempDom = document.getElementById("template-list"); tempDom.innerHTML = "";
   
+  // -- VYKRESLENÍ ROUTINE (Dnešek) --
   let todays = tasks.filter(t => t.date === selectedDay);
   const prioWeight = { 'high': 1, 'mid': 2, 'low': 3 };
   todays.sort((a, b) => {
@@ -265,14 +280,25 @@ function render() {
       </div>
       <div class="delete-btn" onclick="removeTask(${t.id}, event)"><svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>`;
     list.appendChild(el);
+  });
+
+  // -- 🔥 VYKRESLENÍ JOURNEY (Historické milníky) 🔥 --
+  const allHistoryDone = tasks.filter(t => t.done); // Všechny hotové úkoly napříč historií
+  
+  milestones.forEach((m, i) => {
+    // Spočítáme, kolikrát jsi historicky splnil úkol s danou ikonou
+    const currentScore = allHistoryDone.filter(t => t.icon === m.icon).length;
+    const isDone = currentScore >= m.target;
+    const displayCount = currentScore > m.target ? m.target : currentScore; // Aby to neukazovalo třeba 25/20
 
     const jel = document.createElement("div"); 
-    jel.className = "tc-item" + (t.done ? " done" : "");
+    jel.className = "tc-item" + (isDone ? " done" : "");
     jel.style.animationDelay = `${i * 0.08}s`;
     jel.innerHTML = `
-      <div class="tc-content" onclick="toggle(${t.id}, event)">
-        <span class="icon">${t.icon}</span>
-        <span class="name">${t.name}</span>
+      <div class="tc-content">
+        <span class="icon">${m.icon}</span>
+        <span class="name">${m.title}</span>
+        <div class="ms-progress">${displayCount} / ${m.target}</div>
       </div>
       <div class="tc-dot"></div>
       <div style="width: 42%;"></div>
@@ -280,6 +306,7 @@ function render() {
     journey.appendChild(jel);
   });
 
+  // -- VYKRESLENÍ SYSTEM (Šablony) --
   templates.forEach((temp, i) => {
     const tel = document.createElement("div"); tel.className = `task priority-${temp.priority}`;
     tel.style.animationDelay = `${i * 0.05}s`;
@@ -294,6 +321,7 @@ function render() {
     tempDom.appendChild(tel);
   });
 
+  // Update Progress Baru pro DNEŠEK
   const done = todays.filter(t => t.done).length, total = todays.length;
   const pct = total ? Math.round((done / total) * 100) : 0;
   document.getElementById("ring").style.strokeDashoffset = CIRC - (pct/100)*CIRC;
@@ -320,9 +348,7 @@ function showView(v) {
   document.getElementById('fab').style.display = (v === 'routine') ? 'flex' : 'none';
 }
 
-function closeModal() {
-  document.getElementById("add-modal").classList.remove("open");
-}
+function closeModal() { document.getElementById("add-modal").classList.remove("open"); }
 
 document.getElementById("fab").onclick = () => { 
   modalMode = 'task';
@@ -340,8 +366,6 @@ function openTemplateModal() {
   setTimeout(() => document.getElementById("task-input").focus(), 100); 
 }
 
-document.getElementById("add-modal").onclick = e => { if(e.target.id === "add-modal") closeModal(); };
-
 document.querySelectorAll(".icon-opt").forEach(b => b.onclick = e => { document.querySelectorAll(".icon-opt").forEach(x => x.classList.remove("selected")); e.currentTarget.classList.add("selected"); currentIcon = e.currentTarget.dataset.icon; });
 document.querySelectorAll(".prio-btn").forEach(btn => { btn.onclick = () => { document.querySelectorAll(".prio-btn").forEach(x => x.classList.remove("selected")); btn.classList.add("selected"); selectedPriority = btn.dataset.prio; }; });
 
@@ -354,10 +378,7 @@ document.getElementById("modal-add-btn").onclick = () => {
     templates.push({ name: val, priority: selectedPriority, icon: currentIcon });
   }
   
-  save(); 
-  document.getElementById("task-input").value = ""; 
-  closeModal();
-  render();
+  save(); document.getElementById("task-input").value = ""; closeModal(); render();
 };
 
 checkAutoReset(); buildCalendar(); render(); showView('routine');
