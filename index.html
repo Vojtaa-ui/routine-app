@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine System v7</title>
+  <title>Routine System v8</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F0EEF8; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -95,19 +95,25 @@
     .tab.active svg { transform: scale(1.1); }
     .tab span { font-size: 11px; font-weight: 700; }
 
-    /* Modal Styling */
+    /* Modal Styling - OPRAVENO */
     .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
     .add-modal.open { display: flex; opacity: 1; }
-    .modal-box { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 40px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
+    .modal-box { position: relative; background: white; border-radius: 24px 24px 0 0; padding: 32px 20px 40px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
     .add-modal.open .modal-box { transform: translateY(0); }
+    
+    /* Křížek na zavření */
+    .close-modal { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; transition: 0.2s; }
+    .close-modal:active { transform: scale(0.9); background: #E5E7EB; }
+
     .modal-box input { width: 100%; font-size: 16px; padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 20px; background: #F9FAFB; transition: border-color 0.2s; }
     .modal-box input:focus { border-color: #7C3AED; background: white; }
     
     .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
     .icon-grid { display: flex; gap: 10px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 5px; }
     
-    .icon-opt { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #F3F4F6; border-radius: 14px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: all 0.2s; }
-    .icon-opt.selected { border-color: #7C3AED; background: #EDE9FE; transform: scale(1.1); }
+    /* OPRAVA EMOJI BOXŮ: Používáme box-shadow místo border, aby to nedeformovalo layout */
+    .icon-opt { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #F3F4F6; border-radius: 14px; cursor: pointer; flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 0 2px transparent; }
+    .icon-opt.selected { background: #EDE9FE; transform: scale(1.15); box-shadow: 0 0 0 2px #7C3AED; }
     
     .priority-selector { display: flex; gap: 10px; margin-bottom: 28px; }
     .prio-btn { flex: 1; padding: 12px; border-radius: 14px; border: 2px solid #E5E7EB; font-size: 13px; font-weight: 800; text-align: center; cursor: pointer; transition: all 0.2s; color: #6B7280; }
@@ -162,6 +168,8 @@
 
 <div class="add-modal" id="add-modal">
   <div class="modal-box">
+    <div class="close-modal" onclick="closeModal()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+    
     <input id="task-input" placeholder="Co tě čeká?" autocomplete="off" />
     <div class="selector-title">IKONA</div>
     <div class="icon-grid" id="icon-picker">
@@ -197,7 +205,6 @@ let selectedDay = new Date().getDate();
 let currentIcon = "💪"; 
 let selectedPriority = "mid";
 
-// Modální mód: 'task' nebo 'template'
 let modalMode = 'task'; 
 
 function checkAutoReset() {
@@ -310,11 +317,13 @@ function showView(v) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + v).classList.add('active');
   
-  // Schovat FAB na jiných záložkách než Routine, pokud chceš. (Zatím nechávám)
   document.getElementById('fab').style.display = (v === 'routine') ? 'flex' : 'none';
 }
 
-// LOGIKA PRO CHYTRÝ MODAL
+function closeModal() {
+  document.getElementById("add-modal").classList.remove("open");
+}
+
 document.getElementById("fab").onclick = () => { 
   modalMode = 'task';
   document.getElementById("task-input").placeholder = "Co tě čeká?";
@@ -331,7 +340,7 @@ function openTemplateModal() {
   setTimeout(() => document.getElementById("task-input").focus(), 100); 
 }
 
-document.getElementById("add-modal").onclick = e => { if(e.target.id === "add-modal") e.target.classList.remove("open"); };
+document.getElementById("add-modal").onclick = e => { if(e.target.id === "add-modal") closeModal(); };
 
 document.querySelectorAll(".icon-opt").forEach(b => b.onclick = e => { document.querySelectorAll(".icon-opt").forEach(x => x.classList.remove("selected")); e.currentTarget.classList.add("selected"); currentIcon = e.currentTarget.dataset.icon; });
 document.querySelectorAll(".prio-btn").forEach(btn => { btn.onclick = () => { document.querySelectorAll(".prio-btn").forEach(x => x.classList.remove("selected")); btn.classList.add("selected"); selectedPriority = btn.dataset.prio; }; });
@@ -347,7 +356,7 @@ document.getElementById("modal-add-btn").onclick = () => {
   
   save(); 
   document.getElementById("task-input").value = ""; 
-  document.getElementById("add-modal").classList.remove("open"); 
+  closeModal();
   render();
 };
 
