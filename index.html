@@ -5,175 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine RPG Master v17</title>
+  <title>System RPG v19</title>
 
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* --- 1. ZÁKLADNÍ RESET A PROMĚNNÉ --- */
+    /* --- 1. ZÁKLAD (Kompaktní design) --- */
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background: #F0EEF8; font-family: -apple-system, system-ui, sans-serif; color: #1F2937; overflow-x: hidden; }
-    .phone { max-width: 450px; width: 100%; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 120px; }
+    .phone { max-width: 450px; width: 100%; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 110px; }
 
     /* --- 2. ANIMACE --- */
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes pulseGold { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @keyframes victoryJump { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2) translateY(-10px); } }
+    @keyframes pulseGold { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
 
-    /* --- 3. HEADER A BADGE --- */
-    .header { text-align: center; padding: 25px 20px 10px; position: relative; }
-    h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-    .date-label { font-size: 14px; color: #6B7280; font-weight: 600; margin-top: 4px; }
-    .counter-badge { position: absolute; right: 20px; top: 25px; background: white; border-radius: 20px; padding: 6px 14px; font-size: 14px; font-weight: 800; border: 1px solid #D1D5DB; display: flex; align-items: center; gap: 6px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .counter-badge.all-done { background: #10B981; color: white; border-color: #10B981; transform: scale(1.1); }
+    /* --- 3. UI PRVKY (ROUTINE & SYSTEM) - Stejné jako V18 --- */
+    .header { text-align: center; padding: 20px 20px 10px; position: relative; }
+    h1 { font-size: 22px; font-weight: 800; }
+    .date-label { font-size: 13px; color: #6B7280; font-weight: 600; margin-top: 2px; }
+    .counter-badge { position: absolute; right: 20px; top: 22px; background: white; border-radius: 20px; padding: 5px 12px; font-size: 13px; font-weight: 800; border: 1px solid #D1D5DB; display: flex; align-items: center; gap: 5px; transition: all 0.3s ease; }
+    .counter-badge.all-done { background: #10B981; color: white; border-color: #10B981; animation: pop 0.4s ease; }
 
-    /* --- 4. KALENDÁŘ --- */
-    .calendar { display: flex; justify-content: space-between; padding: 15px 16px; gap: 8px; }
-    .cal-day { flex: 1; text-align: center; cursor: pointer; border-radius: 16px; padding: 10px 5px; border: 1px solid #D1D5DB; background: white; transition: all 0.2s; }
-    .cal-day.active { border-color: #7C3AED; background: #EDE9FE; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15); }
-    .cal-day .day-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-bottom: 4px; }
-    .cal-day .day-num { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 15px; font-weight: 800; }
+    .calendar { display: flex; justify-content: space-between; padding: 12px 16px; gap: 6px; }
+    .cal-day { flex: 1; text-align: center; cursor: pointer; border-radius: 12px; padding: 8px 2px; border: 1px solid #D1D5DB; background: white; transition: all 0.2s; }
+    .cal-day.active { border-color: #7C3AED; background: #EDE9FE; transform: translateY(-2px); }
+    .cal-day .day-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 14px; font-weight: 800; }
     .cal-day.active .day-num { background: #7C3AED; color: white; }
 
-    /* --- 5. PROGRESS RING --- */
-    .progress-card { background: white; margin: 10px 16px 25px; border-radius: 24px; padding: 20px; display: flex; align-items: center; gap: 20px; border: 1px solid #D1D5DB; box-shadow: 0 4px 6px rgba(0,0,0,0.02); animation: slideUp 0.5s ease; }
-    .ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
-    .ring-wrap svg { transform: rotate(-90deg); width: 80px; height: 80px; }
-    .ring-bg { fill: none; stroke: #F3F4F6; stroke-width: 8; }
-    .ring-fg { fill: none; stroke: #7C3AED; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1); }
-    .ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #111827; }
-    .progress-text h2 { font-size: 18px; font-weight: 800; }
-    .progress-text p { font-size: 13px; color: #6B7280; font-weight: 500; margin-top: 2px; }
+    .progress-card { background: white; margin: 10px 16px 20px; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; border: 1px solid #D1D5DB; animation: slideUp 0.5s ease; }
+    .ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+    .ring-wrap svg { transform: rotate(-90deg); width: 72px; height: 72px; }
+    .ring-bg { fill: none; stroke: #F3F4F6; stroke-width: 7; }
+    .ring-fg { fill: none; stroke: #7C3AED; stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+    .ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #000; }
+    .progress-text h2 { font-size: 16px; font-weight: 800; }
+    .progress-text p { font-size: 12px; color: #6B7280; font-weight: 500; }
 
-    /* --- 6. ÚKOLY (TASKS) --- */
-    .section-title { font-size: 17px; font-weight: 800; padding: 0 20px 12px; display: flex; justify-content: space-between; align-items: center; }
-    .tasks { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
-    .task { border-radius: 20px; padding: 16px; display: flex; align-items: center; gap: 14px; border: 1px solid #D1D5DB; background: white; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); opacity: 0; animation: slideUp 0.4s forwards; }
-    
-    /* Priority stylizace */
-    .task.priority-high { border-left: 6px solid #EF4444; background: #FEF2F2; border-color: #FECACA; }
-    .task.priority-mid { border-left: 6px solid #F59E0B; background: #FFFBEB; border-color: #FDE68A; }
-    .task.priority-low { border-left: 6px solid #10B981; background: #ECFDF5; border-color: #A7F3D0; }
-    .task.done { opacity: 0.6; transform: scale(0.97); filter: grayscale(0.5); border-left-color: #D1D5DB; background: #F9FAFB; }
+    .tasks { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+    .task { border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #D1D5DB; background: white; transition: all 0.3s; animation: slideUp 0.4s forwards; }
+    .task.priority-high { border-left: 6px solid #EF4444; background: #FEF2F2; }
+    .task.priority-mid { border-left: 6px solid #F59E0B; background: #FFFBEB; }
+    .task.priority-low { border-left: 6px solid #10B981; background: #ECFDF5; }
+    .task.done { opacity: 0.5; transform: scale(0.97); filter: grayscale(0.2); background: #F9FAFB; border-left-color: #D1D5DB; }
 
-    .task-check { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid #7C3AED; display: grid; place-items: center; cursor: pointer; background: white; transition: all 0.2s; }
+    .task-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #7C3AED; display: grid; place-items: center; cursor: pointer; background: white; flex-shrink: 0; }
     .task.done .task-check { background: #7C3AED; }
-    .task-check svg { width: 16px; height: 16px; stroke: white; stroke-width: 4; fill: none; display: none; }
+    .task-check svg { width: 14px; height: 14px; stroke: white; stroke-width: 4; fill: none; display: none; }
     .task.done .task-check svg { display: block; }
-    
-    .task-info { flex: 1; }
-    .task-name { font-size: 15px; font-weight: 700; color: #111827; }
+    .task-info { flex: 1; min-width: 0; }
+    .task-name { font-size: 14px; font-weight: 700; color: #111827; }
     .task.done .task-name { text-decoration: line-through; color: #9CA3AF; }
-    .task-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 2px; opacity: 0.8; }
 
-    .delete-btn { color: #D1D5DB; padding: 5px; cursor: pointer; transition: color 0.2s; }
-    .delete-btn:hover { color: #EF4444; }
-
-    /* --- 7. JOURNEY - HUB & PATHS --- */
+    /* --- 4. 🔥 JOURNEY & GAME PATH 🔥 --- */
     #journey-view { display: none; padding: 0 0 100px; }
-    #journey-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; animation: slideUp 0.5s ease; }
-    .hub-card { background: white; border-radius: 28px; padding: 25px 20px; text-align: center; border: 1px solid #D1D5DB; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-    .hub-card:active { transform: scale(0.95); }
-    .hub-icon { font-size: 42px; margin-bottom: 12px; display: block; }
-    .hub-title { font-size: 15px; font-weight: 800; color: #111827; }
+    #journey-hub { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; animation: slideUp 0.4s ease; }
+    .hub-card { background: white; border-radius: 24px; padding: 22px 16px; text-align: center; border: 1px solid #D1D5DB; cursor: pointer; transition: all 0.2s; }
+    .hub-card:active { transform: scale(0.96); }
+    .hub-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+    .hub-title { font-size: 13px; font-weight: 800; color: #111827; }
 
-    #journey-path { display: none; padding: 16px; animation: slideUp 0.5s ease; }
-    .back-btn { background: #7C3AED; color: white; border: none; padding: 12px 20px; border-radius: 16px; font-weight: 800; margin-bottom: 30px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    #journey-path { display: none; padding: 16px; animation: slideUp 0.4s ease; }
+    .back-btn { background: #7C3AED; color: white; border: none; padding: 10px 16px; border-radius: 12px; font-weight: 800; margin-bottom: 20px; cursor: pointer; font-size: 13px; }
 
-    .path-container { position: relative; padding: 40px 0; display: flex; flex-direction: column; align-items: center; min-height: 600px; }
-    .path-line { position: absolute; top: 0; bottom: 0; width: 8px; background: #D1D5DB; border-radius: 4px; z-index: 1; }
+    .path-container { position: relative; padding: 40px 0; display: flex; flex-direction: column; align-items: center; min-height: 500px; }
     
-    .path-step { position: relative; z-index: 2; margin-bottom: 70px; width: 100%; display: flex; justify-content: center; }
-    .path-step:nth-child(even) { transform: translateX(60px); }
-    .path-step:nth-child(odd) { transform: translateX(-60px); }
+    /* Hlavní, elegantní lajna */
+    .path-line { position: absolute; top: 0; bottom: 0; width: 6px; background: #E5E7EB; border-radius: 3px; z-index: 1; left: 50%; transform: translateX(-50%); }
     
-    .step-node { width: 75px; height: 75px; background: white; border: 5px solid #D1D5DB; border-radius: 50%; display: grid; place-items: center; font-size: 32px; position: relative; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .path-step.done .step-node { border-color: #10B981; background: #ECFDF5; animation: pulseGold 2s infinite; transform: scale(1.1); }
-    .path-step.locked .step-node { filter: grayscale(1); opacity: 0.5; }
+    .path-step { position: relative; z-index: 2; margin-bottom: 60px; /* Větší mezera pro cestičku */ width: 100%; display: flex; justify-content: center; align-items: center; }
     
-    .step-info { position: absolute; top: 50%; left: 95px; transform: translateY(-50%); width: 160px; text-align: left; background: white; padding: 10px; border-radius: 12px; border: 1px solid #E5E7EB; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    .path-step:nth-child(even) .step-info { left: auto; right: 95px; text-align: right; }
-    .step-info b { display: block; font-size: 13px; color: #111827; }
-    .step-info span { font-size: 11px; color: #6B7280; font-weight: 700; margin-top: 2px; display: block; }
+    /* Klikatý design s "mostem" k lajně */
+    .path-step:nth-child(even) { transform: translateX(50px); }
+    .path-step:nth-child(odd) { transform: translateX(-50px); }
+    .path-step::after { content: ''; position: absolute; height: 4px; background: #E5E7EB; top: 50%; transform: translateY(-50%); z-index: -1; transition: background 0.4s; }
+    .path-step:nth-child(even)::after { left: auto; right: 50%; width: 50px; }
+    .path-step:nth-child(odd)::after { left: 50%; width: 50px; }
+    
+    /* Styl hotového mostu */
+    .path-step.done::after { background: #86EFAC; }
 
-    /* --- 8. SYSTEM VIEW --- */
+    .step-node { width: 66px; height: 66px; background: white; border: 5px solid #D1D5DB; border-radius: 50%; display: grid; place-items: center; font-size: 28px; position: relative; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .path-step.done .step-node { border-color: #10B981; background: #ECFDF5; animation: victoryJump 0.6s ease, pulseGold 2s infinite; }
+    .path-step.locked .step-node { opacity: 0.4; filter: grayscale(1); }
+    
+    .step-info { position: absolute; top: 50%; left: 85px; transform: translateY(-50%); width: 150px; text-align: left; pointer-events: none; }
+    .path-step:nth-child(even) .step-info { left: auto; right: 85px; text-align: right; }
+    .step-info b { display: block; font-size: 12px; color: #111827; }
+    .step-info span { font-size: 10px; color: #6B7280; font-weight: 700; margin-top: 1px; }
+
+    /* Cestička mezi body (👣) */
+    .path-connector { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: -60px; margin-bottom: 20px; z-index: 1; pointer-events: none; }
+    .path-connector span { font-size: 12px; color: #D1D5DB; font-weight: bold; margin-bottom: 5px; opacity: 0.8; }
+    .path-connector span:last-child { margin-bottom: 0; }
+    .path-connector.done span { color: #86EFAC; }
+
+    /* --- 5. SYSTEM, TABBAR, MODAL (Stejné jako V18) --- */
     #system-view { display: none; padding: 0 16px 100px; }
-    .sys-info { background: #EDE9FE; padding: 16px; border-radius: 20px; font-size: 13px; color: #5B21B6; font-weight: 600; margin: 10px 0 25px; text-align: center; border: 1px solid #DDD6FE; line-height: 1.5; }
-    .sys-add-btn { width: 100%; padding: 18px; border-radius: 20px; border: 2px dashed #7C3AED; background: #F5F3FF; color: #7C3AED; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 15px; }
-
-    /* --- 9. TABBAR & FAB --- */
-    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 12px 20px 30px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 100; }
-    .tab { flex: 1; text-align: center; color: #9CA3AF; cursor: pointer; transition: all 0.3s; }
-    .tab.active { color: #7C3AED; transform: translateY(-3px); }
-    .tab-icon { font-size: 22px; display: block; margin-bottom: 4px; }
-    .tab span { font-size: 10px; font-weight: 800; text-transform: uppercase; }
-    
-    .fab { position: fixed; bottom: 95px; right: 20px; width: 64px; height: 64px; background: #7C3AED; border-radius: 50%; display: grid; place-items: center; color: white; font-size: 32px; box-shadow: 0 8px 20px rgba(124,58,237,0.4); z-index: 90; cursor: pointer; transition: all 0.2s; }
-    .fab:active { transform: scale(0.9); }
-
-    /* --- 10. SMART MODAL --- */
-    .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: flex-end; backdrop-filter: blur(5px); }
+    .sys-info { background: #EDE9FE; padding: 14px; border-radius: 16px; font-size: 12px; color: #5B21B6; font-weight: 600; margin: 10px 0 20px; text-align: center; border: 1px solid #DDD6FE; line-height: 1.4; }
+    .sys-add-btn { width: 100%; padding: 16px; border-radius: 18px; border: 2px dashed #7C3AED; background: #F5F3FF; color: #7C3AED; font-weight: 800; cursor: pointer; }
+    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); padding: 12px 20px 28px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 100; }
+    .tab { flex: 1; text-align: center; color: #9CA3AF; cursor: pointer; }
+    .tab.active { color: #7C3AED; }
+    .tab-icon { font-size: 20px; display: block; margin-bottom: 3px; }
+    .tab span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: #7C3AED; border-radius: 50%; display: grid; place-items: center; color: white; font-size: 30px; box-shadow: 0 6px 16px rgba(124,58,237,0.3); z-index: 90; cursor: pointer; }
+    .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: flex-end; backdrop-filter: blur(4px); }
     .add-modal.open { display: flex; }
-    .modal-box { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 40px 20px 50px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1); position: relative; }
-    .close-modal { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; background: #F3F4F6; border-radius: 50%; display: grid; place-items: center; color: #9CA3AF; cursor: pointer; font-weight: bold; }
-    
-    .modal-input { width: 100%; padding: 18px; border-radius: 18px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 25px; font-size: 16px; font-weight: 600; transition: border-color 0.2s; }
-    .modal-input:focus { border-color: #7C3AED; }
-
-    .selector-label { font-size: 12px; font-weight: 800; color: #9CA3AF; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .icon-grid { display: flex; gap: 14px; margin-bottom: 30px; overflow-x: auto; padding: 10px 5px 15px; }
-    .icon-opt { width: 56px; height: 56px; display: grid; place-items: center; font-size: 28px; background: #F3F4F6; border-radius: 18px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: all 0.2s; padding-top: 4px; }
-    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.15); box-shadow: 0 5px 15px rgba(124,58,237,0.2); }
-
-    .prio-selector { display: flex; gap: 10px; margin-bottom: 35px; }
-    .prio-btn { flex: 1; padding: 15px; border-radius: 16px; border: 2px solid #E5E7EB; font-size: 13px; font-weight: 800; text-align: center; cursor: pointer; color: #6B7280; transition: all 0.2s; }
+    .modal-box { background: white; width: 100%; border-radius: 24px 24px 0 0; padding: 35px 20px 45px; animation: slideUp 0.3s ease; position: relative; }
+    .modal-input { width: 100%; padding: 15px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 20px; font-size: 15px; font-weight: 600; }
+    .icon-grid { display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding: 10px 5px; }
+    .icon-opt { width: 50px; height: 50px; display: grid; place-items: center; font-size: 26px; background: #F3F4F6; border-radius: 15px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; padding-top: 4px; }
+    .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.1); }
+    .prio-selector { display: flex; gap: 8px; margin-bottom: 30px; }
+    .prio-btn { flex: 1; padding: 12px; border-radius: 12px; border: 2px solid #E5E7EB; font-size: 12px; font-weight: 800; text-align: center; cursor: pointer; color: #6B7280; }
     .prio-btn[data-prio="high"].selected { background: #FEF2F2; color: #EF4444; border-color: #EF4444; }
     .prio-btn[data-prio="mid"].selected { background: #FFFBEB; color: #F59E0B; border-color: #F59E0B; }
     .prio-btn[data-prio="low"].selected { background: #ECFDF5; color: #10B981; border-color: #10B981; }
-
-    .save-btn { width: 100%; background: #7C3AED; color: white; border: none; border-radius: 20px; padding: 20px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(124,58,237,0.3); }
+    .save-btn { width: 100%; background: #7C3AED; color: white; border: none; border-radius: 16px; padding: 18px; font-size: 15px; font-weight: 800; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <div class="phone">
   <div id="routine-view">
-    <div class="header">
-      <h1>Daily Routine</h1>
-      <p class="date-label" id="date-label">Načítám...</p>
-      <div class="counter-badge" id="main-counter">
-        <span id="counter-text">0</span>
-      </div>
-    </div>
-
+    <div class="header"><h1>Daily Routine</h1><p class="date-label" id="date-label">April 2026</p><div class="counter-badge" id="main-counter"><span id="counter-text">0</span></div></div>
     <div class="calendar" id="calendar"></div>
-
     <div class="progress-card">
       <div class="ring-wrap">
-        <svg viewBox="0 0 80 80">
-          <circle class="ring-bg" cx="40" cy="40" r="35"/>
-          <circle class="ring-fg" id="ring" cx="40" cy="40" r="35" stroke-dasharray="219.9" stroke-dashoffset="219.9"/>
-        </svg>
+        <svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="35"/><circle class="ring-fg" id="ring" cx="40" cy="40" r="35" stroke-dasharray="219.9" stroke-dashoffset="219.9"/></svg>
         <div class="ring-pct" id="pct-text">0%</div>
       </div>
-      <div class="progress-text">
-        <h2>Tvůj progres</h2>
-        <p id="progress-sub">Dnes nemáš žádné úkoly</p>
-      </div>
+      <div class="progress-text"><h2>Tvůj progres</h2><p id="progress-sub">0 z 0 hotovo</p></div>
     </div>
-
-    <div class="section-title">Dnešní úkoly</div>
     <div class="tasks" id="task-list"></div>
   </div>
 
   <div id="journey-view">
-    <div class="header"><h1>Skill Trees</h1><p class="date-label">Dosáhni svých cílů</p></div>
-    
+    <div class="header"><h1>Skill Trees</h1><p class="date-label">Vyber si svou cestu</p></div>
     <div id="journey-hub"></div>
-
     <div id="journey-path">
-      <button class="back-btn" onclick="closeJourneyDetail()">← Zpět na výběr</button>
+      <button class="back-btn" onclick="closeJourneyDetail()">← Zpět na rozcestí</button>
       <div class="path-container">
         <div class="path-line"></div>
         <div id="path-steps-list" style="width:100%"></div>
@@ -182,277 +155,130 @@
   </div>
 
   <div id="system-view">
-    <div class="header"><h1>Master System</h1><p class="date-label">Automatické rituály ve 4:00</p></div>
-    <div class="sys-info">Nadefinuj si úkoly, které se ti každé ráno samy vytvoří. Šetři svoji disciplínu.</div>
-    <div class="tasks" id="template-list"></div>
-    <button class="sys-add-btn" onclick="openModal('template')">+ Přidat ranní šablonu</button>
+    <div class="header"><h1>Master System</h1><p class="date-label">Ranní spawn (4:00)</p></div>
+    <div class="sys-info">Tyto úkoly se každé ráno samy přidají do Routine.</div>
+    <div id="template-list" class="tasks"></div>
+    <button class="sys-add-btn" onclick="openModal('template')">+ Přidat ranní rituál</button>
   </div>
 
   <div class="fab" onclick="openModal('task')">+</div>
-
   <div class="tabbar">
-    <div class="tab active" id="tab-routine" onclick="showView('routine')">
-      <span class="tab-icon">🏠</span><span>Routine</span>
-    </div>
-    <div class="tab" id="tab-journey" onclick="showView('journey')">
-      <span class="tab-icon">🗺️</span><span>Journey</span>
-    </div>
-    <div class="tab" id="tab-system" onclick="showView('system')">
-      <span class="tab-icon">⚙️</span><span>System</span>
-    </div>
+    <div class="tab active" id="tab-routine" onclick="showView('routine')"><span class="tab-icon">🏠</span><span>Routine</span></div>
+    <div class="tab" id="tab-journey" onclick="showView('journey')"><span class="tab-icon">🗺️</span><span>Journey</span></div>
+    <div class="tab" id="tab-system" onclick="showView('system')"><span class="tab-icon">⚙️</span><span>System</span></div>
   </div>
 </div>
 
-<div class="add-modal" id="add-modal">
-  <div class="modal-box">
-    <div class="close-modal" onclick="closeModal()">✕</div>
-    <h2 id="modal-title" style="margin-bottom:20px; font-size:20px;">Nový úkol</h2>
-    
-    <input id="task-input" class="modal-input" placeholder="Co je třeba udělat?" autocomplete="off">
-    
-    <p class="selector-label">Vyber ikonu (kategorie)</p>
-    <div class="icon-grid" id="icon-picker"></div>
-
-    <p class="selector-label">Priorita</p>
-    <div class="prio-selector">
-      <div class="prio-btn" data-prio="low">LOW</div>
-      <div class="prio-btn selected" data-prio="mid">MID</div>
-      <div class="prio-btn" data-prio="high">HIGH</div>
-    </div>
-
-    <button class="save-btn" id="modal-save-btn">Uložit do systému</button>
-  </div>
-</div>
+<div class="add-modal" id="add-modal"><div class="modal-box"><div style="position:absolute;top:15px;right:15px;color:#AAA;" onclick="closeModal()">✕</div><h3 id="modal-title" style="margin-bottom:15px;font-size:17px;">Nový úkol</h3><input id="task-input" class="modal-input" placeholder="Co tě čeká?" autocomplete="off"><p style="font-size:11px;color:#999;margin-bottom:10px;">Ikona & Kategorie</p><div class="icon-grid" id="icon-picker"></div><p style="font-size:11px;color:#999;margin-bottom:10px;">Priorita</p><div class="prio-selector"><div class="prio-btn" data-prio="low">LOW</div><div class="prio-btn selected" data-prio="mid">MID</div><div class="prio-btn" data-prio="high">HIGH</div></div><button class="save-btn" id="modal-save-btn">Uložit do systému</button></div></div>
 
 <script>
-/* --- A. DATA STATE --- */
-let tasks = JSON.parse(localStorage.getItem('mySystemTasks_v17')) || [];
-let templates = JSON.parse(localStorage.getItem('myTemplates_v17')) || [
+/* --- DATA --- */
+let tasks = JSON.parse(localStorage.getItem('mySystemTasks_v19')) || [];
+let templates = JSON.parse(localStorage.getItem('myTemplates_v19')) || [
   { name: "Studium Make.com", priority: "high", icon: "💻" },
   { name: "Ledová sprcha", priority: "mid", icon: "💪" }
 ];
-let lastResetDate = localStorage.getItem('lastResetDate_v17') || "";
+let lastResetDate = localStorage.getItem('lastResetDate_v19') || "";
 
-const icons = ["💪", "💻", "📚", "💧", "🍳", "🧘‍♂️", "💸", "🏃‍♂️", "🎯", "🔥"];
+const icons = ["💪", "💻", "📚", "💧", "🍳", "🧘‍♂️", "💸", "🏃‍♂️", "🎯"];
 const milestones = [
   { cat: "💪", title: "Nováček", target: 1 },
-  { cat: "💪", title: "Dříč", target: 10 },
+  { cat: "💪", title: "Pravidelný dříč", target: 10 },
   { cat: "💪", title: "Bestie", target: 50 },
-  { cat: "💻", title: "První kód", target: 1 },
-  { cat: "💻", title: "Developer", target: 20 },
-  { cat: "💻", title: "Architect", target: 100 },
+  { cat: "💻", title: "Hello World", target: 1 },
+  { cat: "💻", title: "Automatizátor", target: 20 },
+  { cat: "💻", title: "Make God", target: 100 },
   { cat: "📚", title: "Čtenář", target: 5 },
-  { cat: "💧", title: "Hydratace", target: 14 },
-  { cat: "💸", title: "První Profit", target: 1 }
+  { cat: "💧", title: "Hydratovaný", target: 14 }
 ];
-const catNames = {"💪":"Fitness","💻":"Dev Skill","📚":"Mindset","💧":"Zdraví","💸":"Money","🎯":"Cíle"};
+const catNames = {"💪":"Fitness","💻":"Developer","📚":"Mindset","💧":"Zdraví","💸":"Money","🎯":"Cíle"};
 
 let selectedDay = new Date().getDate();
 let currentIcon = "💪";
 let selectedPriority = "mid";
-let modalMode = 'task'; // 'task' nebo 'template'
+let modalMode = 'task';
 
-/* --- B. CORE FUNCTIONS --- */
-function save() {
-  localStorage.setItem('mySystemTasks_v17', JSON.stringify(tasks));
-  localStorage.setItem('myTemplates_v17', JSON.stringify(templates));
-}
+/* --- CORE --- */
+function save() { localStorage.setItem('mySystemTasks_v19', JSON.stringify(tasks)); localStorage.setItem('myTemplates_v19', JSON.stringify(templates)); }
+function checkAutoReset() { const now = new Date(); if (lastResetDate !== now.toDateString() && now.getHours() >= 4) { templates.forEach(t => tasks.push({ id: Date.now()+Math.random(), name:t.name, icon:t.icon, priority:t.priority, done:false, date:now.getDate() })); localStorage.setItem('lastResetDate_v19', now.toDateString()); lastResetDate=now.toDateString(); save(); } }
 
-// Automatický reset ve 4:00 ráno
-function checkAutoReset() {
-  const now = new Date();
-  const todayStr = now.toDateString();
-  const hour = now.getHours();
-
-  if (lastResetDate !== todayStr && hour >= 4) {
-    templates.forEach(t => {
-      tasks.push({ id: Date.now() + Math.random(), name: t.name, icon: t.icon, priority: t.priority, done: false, date: now.getDate() });
-    });
-    localStorage.setItem('lastResetDate_v17', todayStr);
-    lastResetDate = todayStr;
-    save();
-  }
-}
-
-/* --- C. RENDERING --- */
+/* --- RENDERING --- */
 function render() {
-  // 1. Routine View
+  // Routine
   const list = document.getElementById("task-list"); list.innerHTML = "";
   const todays = tasks.filter(t => t.date === selectedDay);
-  
-  // Řazení: Hotové dolů, pak podle priority
-  const weight = { high: 1, mid: 2, low: 3 };
-  todays.sort((a,b) => a.done - b.done || weight[a.priority] - weight[b.priority]);
+  todays.sort((a,b) => a.done - b.done);
 
   todays.forEach((t, i) => {
-    const el = document.createElement("div");
-    el.className = `task priority-${t.priority} ${t.done ? 'done' : ''}`;
-    el.style.animationDelay = (i * 0.05) + 's';
-    el.innerHTML = `
-      <div class="task-check" onclick="toggleTask(${t.id})"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div style="font-size:24px;">${t.icon}</div>
-      <div class="task-info" onclick="toggleTask(${t.id})">
-        <div class="task-tag" style="color:var(--prio-color)">${t.priority}</div>
-        <div class="task-name">${t.name}</div>
-      </div>
-      <div class="delete-btn" onclick="removeTask(${t.id})">✕</div>
-    `;
+    const el = document.createElement("div"); el.className = `task priority-${t.priority} ${t.done?'done':''}`;
+    el.style.animationDelay = (i * 0.04) + 's';
+    el.innerHTML = `<div class="task-check" onclick="toggleTask(${t.id})"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div style="font-size:22px;">${t.icon}</div><div class="task-info" onclick="toggleTask(${t.id})"><div class="task-tag">${t.priority}</div><div class="task-name">${t.name}</div></div><div onclick="removeTask(${t.id})" style="color:#DDD">✕</div>`;
     list.appendChild(el);
   });
 
-  // Progress Update
   const doneCount = todays.filter(t => t.done).length;
-  const total = todays.length || 1;
   const pct = todays.length ? Math.round((doneCount / todays.length) * 100) : 0;
-  
   document.getElementById("pct-text").innerText = pct + "%";
-  document.getElementById("ring").style.strokeDashoffset = 219.9 - (pct/100) * 219.9;
-  document.getElementById("progress-sub").innerText = todays.length ? `${doneCount} z ${todays.length} hotovo` : "Dnes nemáš žádné úkoly";
-  
-  const badge = document.getElementById("main-counter");
+  document.getElementById("ring").style.strokeDashoffset = 219.9 - (pct/100)*219.9;
+  document.getElementById("progress-sub").innerText = `${doneCount} z ${todays.length} hotovo`;
   document.getElementById("counter-text").innerText = todays.length - doneCount;
-  if (todays.length > 0 && doneCount === todays.length) badge.classList.add("all-done");
-  else badge.classList.remove("all-done");
 
-  // 2. System View
+  // System
   const tList = document.getElementById("template-list"); tList.innerHTML = "";
   templates.forEach((t, i) => {
-    const el = document.createElement("div");
-    el.className = `task priority-${t.priority}`;
-    el.innerHTML = `
-      <div style="font-size:22px;">${t.icon}</div>
-      <div class="task-info"><b>${t.name}</b></div>
-      <div class="delete-btn" onclick="removeTemplate(${i})">✕</div>
-    `;
+    const el = document.createElement("div"); el.className=`task priority-${t.priority}`;
+    el.innerHTML = `<div style="font-size:20px;">${t.icon}</div><div class="task-info"><b>${t.name}</b></div><div onclick="removeTemplate(${i})" style="color:#DDD">✕</div>`;
     tList.appendChild(el);
   });
-
-  // 3. Journey Hub
   renderJourneyHub();
 }
 
 function renderJourneyHub() {
   const hub = document.getElementById("journey-hub"); hub.innerHTML = "";
-  const categories = [...new Set(milestones.map(m => m.cat))];
-  
-  categories.forEach(cat => {
-    const card = document.createElement("div");
-    card.className = "hub-card";
+  [...new Set(milestones.map(m => m.cat))].forEach(cat => {
+    const card = document.createElement("div"); card.className = "hub-card";
     card.onclick = () => openJourneyPath(cat);
-    card.innerHTML = `<span class="hub-icon">${cat}</span><span class="hub-title">${catNames[cat] || 'Cesta'}</span>`;
+    card.innerHTML = `<span class="hub-icon">${cat}</span><span class="hub-title">${catNames[cat] || 'Skill'}</span>`;
     hub.appendChild(card);
   });
 }
 
 function openJourneyPath(cat) {
-  document.getElementById("journey-hub").style.display = "none";
-  document.getElementById("journey-path").style.display = "block";
+  document.getElementById("journey-hub").style.display="none"; document.getElementById("journey-path").style.display="block";
   const list = document.getElementById("path-steps-list"); list.innerHTML = "";
-  
   const catMilestones = milestones.filter(m => m.cat === cat);
-  const historyScore = tasks.filter(t => t.done && t.icon === cat).length;
+  const score = tasks.filter(t => t.done && t.icon === cat).length;
 
-  catMilestones.forEach(m => {
-    const isDone = historyScore >= m.target;
-    const step = document.createElement("div");
-    step.className = `path-step ${isDone ? 'done' : ''}`;
-    step.innerHTML = `
-      <div class="step-node">${isDone ? cat : '🔒'}</div>
-      <div class="step-info">
-        <b>${m.title}</b>
-        <span>${historyScore} / ${m.target} splněno</span>
-      </div>
-    `;
+  catMilestones.forEach((m, i) => {
+    const isDone = score >= m.target;
+    // Cestička (👣)
+    if (i > 0) {
+      const conn = document.createElement("div"); conn.className = `path-connector ${score >= catMilestones[i-1].target && score < m.target ? 'current-pass' : ''} ${isDone?'done':''}`;
+      conn.innerHTML = `<span>👣</span><span>👣</span>`;
+      list.appendChild(conn);
+    }
+    // Bod
+    const step = document.createElement("div"); step.className = `path-step ${isDone ? 'done' : ''}`;
+    step.innerHTML = `<div class="step-node">${isDone?cat:'🔒'}</div><div class="step-info"><b>${m.title}</b><span>${score}/${m.target} hotovo</span></div>`;
     list.appendChild(step);
-
-    // Fanfáry
-    if (isDone && !localStorage.getItem('achieved_' + m.title)) {
+    if (isDone && !localStorage.getItem('m_a_' + m.title)) {
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-      localStorage.setItem('achieved_' + m.title, 'true');
+      localStorage.setItem('m_a_' + m.title, 'true');
     }
   });
 }
 
-function closeJourneyDetail() {
-  document.getElementById("journey-hub").style.display = "grid";
-  document.getElementById("journey-path").style.display = "none";
-}
-
-/* --- D. UI INTERACTIONS --- */
-function showView(v) {
-  ['routine','journey','system'].forEach(id => document.getElementById(id+'-view').style.display = (id===v?'block':'none'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-'+v).classList.add('active');
-}
-
-function buildCalendar() {
-  const cal = document.getElementById("calendar"); cal.innerHTML = "";
-  const days = ["PO","ÚT","ST","ČT","PÁ"];
-  const nums = [20, 21, 22, 23, 24];
-  nums.forEach((n, i) => {
-    const d = document.createElement("div");
-    d.className = "cal-day" + (n === selectedDay ? " active" : "");
-    d.innerHTML = `<div class="day-label">${days[i]}</div><div class="day-num">${n}</div>`;
-    d.onclick = () => { selectedDay = n; buildCalendar(); render(); };
-    cal.appendChild(d);
-  });
-  document.getElementById("date-label").innerText = `${selectedDay} April 2026`;
-}
-
-// Modal Logic
-function openModal(mode) {
-  modalMode = mode;
-  document.getElementById("add-modal").classList.add("open");
-  document.getElementById("modal-title").innerText = mode === 'task' ? "Nový úkol na dnes" : "Nová ranní šablona";
-  
-  // Icon Picker
-  const picker = document.getElementById("icon-picker"); picker.innerHTML = "";
-  icons.forEach(icon => {
-    const opt = document.createElement("div");
-    opt.className = "icon-opt" + (currentIcon === icon ? " selected" : "");
-    opt.innerText = icon;
-    opt.onclick = () => { currentIcon = icon; openModal(mode); };
-    picker.appendChild(opt);
-  });
-}
-
+function closeJourneyDetail() { document.getElementById("journey-hub").style.display="grid"; document.getElementById("journey-path").style.display="none"; }
+function showView(v) { ['routine','journey','system'].forEach(id => document.getElementById(id+'-view').style.display = (id===v?'block':'none')); document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+v).classList.add('active'); if(v==='journey') closeJourneyDetail(); }
+function buildCalendar() { const cal = document.getElementById("calendar"); cal.innerHTML = ""; const days = ["PO","ÚT","ST","ČT","PÁ","SO","NE"]; const nums = [20,21,22,23,24,25,26]; nums.forEach((n, i) => { const d = document.createElement("div"); d.className = "cal-day" + (n === selectedDay ? " active" : ""); d.innerHTML = `<div class="day-label">${days[i]}</div><div class="day-num">${n}</div>`; d.onclick = () => { selectedDay = n; buildCalendar(); render(); }; cal.appendChild(d); }); document.getElementById("date-label").innerText = `${selectedDay} April 2026`; }
+function openModal(mode) { modalMode = mode; document.getElementById("add-modal").classList.add("open"); const picker = document.getElementById("icon-picker"); picker.innerHTML = ""; icons.forEach(icon => { const opt = document.createElement("div"); opt.className = "icon-opt" + (currentIcon === icon ? " selected" : ""); opt.innerText = icon; opt.onclick = () => { currentIcon = icon; openModal(mode); }; picker.appendChild(opt); }); }
 function closeModal() { document.getElementById("add-modal").classList.remove("open"); }
-
-document.querySelectorAll(".prio-btn").forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll(".prio-btn").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-    selectedPriority = btn.dataset.prio;
-  };
-});
-
-document.getElementById("modal-save-btn").onclick = () => {
-  const val = document.getElementById("task-input").value;
-  if (!val) return;
-  
-  if (modalMode === 'task') {
-    tasks.push({ id: Date.now(), name: val, icon: currentIcon, priority: selectedPriority, done: false, date: selectedDay });
-  } else {
-    templates.push({ name: val, icon: currentIcon, priority: selectedPriority });
-  }
-  
-  save(); render(); closeModal();
-  document.getElementById("task-input").value = "";
-};
-
-// Task Actions
-function toggleTask(id) {
-  const t = tasks.find(x => x.id === id);
-  t.done = !t.done;
-  save(); render();
-}
+document.querySelectorAll(".prio-btn").forEach(btn => { btn.onclick = () => { document.querySelectorAll(".prio-btn").forEach(b => b.classList.remove("selected")); btn.classList.add("selected"); selectedPriority = btn.dataset.prio; }; });
+document.getElementById("modal-save-btn").onclick = () => { const val = document.getElementById("task-input").value; if (!val) return; if (modalMode === 'task') tasks.push({ id: Date.now(), name: val, icon: currentIcon, priority: selectedPriority, done: false, date: selectedDay }); else templates.push({ name: val, icon: currentIcon, priority: selectedPriority }); save(); render(); closeModal(); document.getElementById("task-input").value = ""; };
+function toggleTask(id) { const t = tasks.find(x => x.id === id); t.done = !t.done; save(); render(); }
 function removeTask(id) { tasks = tasks.filter(x => x.id !== id); save(); render(); }
 function removeTemplate(i) { templates.splice(i, 1); save(); render(); }
-
-/* --- E. INIT --- */
-checkAutoReset();
-buildCalendar();
-render();
+checkAutoReset(); buildCalendar(); render();
 </script>
 </body>
 </html>
