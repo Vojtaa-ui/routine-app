@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Routine System v13 - Big Box Fix</title>
+  <title>Routine System v14 - Skill Trees</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #F0EEF8; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
@@ -14,6 +14,7 @@
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
+    /* Header & Badge */
     .header { text-align: center; padding: 0 20px 12px; position: relative; }
     h1 { font-size: 22px; font-weight: 800; color: #000; }
     .date-label { font-size: 14px; color: #444; margin-top: 2px; font-weight: 500; }
@@ -22,6 +23,7 @@
     .dot { width: 8px; height: 8px; background: #7C3AED; border-radius: 50%; transition: all 0.3s; }
     .all-done .dot { background: white; transform: scale(1.2); }
     
+    /* Calendar */
     .calendar { display: flex; justify-content: space-between; padding: 12px 16px; gap: 5px; }
     .cal-day { flex: 1; text-align: center; cursor: pointer; border-radius: 12px; padding: 6px 2px; border: 1px solid #D1D5DB; background: white; transition: all 0.2s; }
     .cal-day .day-label { font-size: 10px; color: #555; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; transition: color 0.2s; }
@@ -29,6 +31,7 @@
     .cal-day.active { border-color: #7C3AED; background: #EDE9FE; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(124,58,237,0.1); }
     .cal-day.active .day-num { background: #7C3AED; color: white; }
 
+    /* Main Progress Card */
     .progress-card { background: white; margin: 10px 16px 20px; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; border: 1px solid #D1D5DB; animation: slideUp 0.5s ease forwards; }
     .ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
     .ring-wrap svg { transform: rotate(-90deg); }
@@ -38,9 +41,9 @@
     .progress-text h2 { font-size: 16px; font-weight: 800; color: #000; }
     .progress-text p { font-size: 13px; color: #555; margin-top: 3px; font-weight: 500; }
 
+    /* Tasks */
     .section-title { font-size: 17px; font-weight: 800; color: #000; padding: 0 20px 8px; }
     .tasks { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 120px; }
-    
     .task { border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #D1D5DB; position: relative; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); opacity: 0; animation: slideUp 0.4s forwards; }
     .task.priority-high { border-left: 6px solid #EF4444; background: #FEF2F2; border-color: #FECACA; }
     .task.priority-mid { border-left: 6px solid #F59E0B; background: #FFFBEB; border-color: #FDE68A; }
@@ -53,7 +56,6 @@
     .task-name { font-size: 15px; font-weight: 700; color: #000; transition: color 0.3s; }
     .task.done .task-name { color: #6B7280; text-decoration: line-through; }
     .task-priority-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; opacity: 0.7; margin-bottom: 2px; }
-    
     .delete-btn { padding: 8px; color: #9CA3AF; cursor: pointer; font-size: 14px; transition: color 0.2s; display: flex; align-items: center; }
     .delete-btn:hover { color: #EF4444; }
     
@@ -62,33 +64,40 @@
     .task-check svg { display: none; width: 14px; height: 14px; stroke: white; stroke-width: 3; fill: none; }
     .task.done .task-check svg { display: block; animation: pop 0.3s ease; }
 
+    /* 🔥 NOVÁ JOURNEY - SKILL TREES 🔥 */
     #journey-view { display: none; padding-bottom: 120px; }
     .journey-header { text-align: center; padding: 20px; animation: slideUp 0.4s forwards; }
     .journey-header h2 { font-size: 24px; font-weight: 800; color: #000; }
     .journey-header p { font-size: 14px; color: #666; margin-top: 5px; }
     
-    .timeline-center { position: relative; max-width: 100%; margin: 20px 16px; padding: 20px 0; }
-    .timeline-center::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #D1D5DB; transform: translateX(-50%); border-radius: 2px; }
-    .tc-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; position: relative; opacity: 0; animation: slideUp 0.4s forwards; }
-    .tc-item:nth-child(even) { flex-direction: row-reverse; }
-    .tc-content { width: 42%; background: white; padding: 14px 12px; border-radius: 16px; border: 1px solid #D1D5DB; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: all 0.3s; }
-    .tc-content .icon { font-size: 26px; margin-bottom: 6px; display: block; transition: transform 0.3s; }
-    .tc-item:not(.done):hover .icon { transform: translateY(-3px); }
-    .tc-content .name { font-size: 13px; font-weight: 800; color: #000; }
+    .journey-container { padding: 0 16px; display: flex; flex-direction: column; gap: 16px; }
     
-    .ms-progress { font-size: 11px; font-weight: 800; color: #7C3AED; background: #EDE9FE; padding: 4px 10px; border-radius: 12px; margin-top: 8px; display: inline-block; transition: all 0.3s; }
-    .tc-item.done .ms-progress { color: #065F46; background: #A7F3D0; }
+    .skill-card { background: white; border-radius: 20px; padding: 18px 20px; border: 1px solid #D1D5DB; box-shadow: 0 4px 15px rgba(0,0,0,0.02); opacity: 0; animation: slideUp 0.4s forwards; }
+    .sc-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1.5px dashed #E5E7EB; }
+    .sc-icon { font-size: 22px; background: #F5F3FF; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; border: 1px solid #EDE9FE; padding-top: 2px; }
+    .sc-title { font-size: 16px; font-weight: 800; color: #000; }
+    
+    .milestone-item { margin-bottom: 14px; position: relative; }
+    .milestone-item:last-child { margin-bottom: 0; }
+    .mi-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
+    .mi-title { font-size: 14px; font-weight: 700; color: #374151; transition: color 0.3s; }
+    .mi-count { font-size: 12px; font-weight: 800; color: #7C3AED; background: #F5F3FF; padding: 2px 8px; border-radius: 10px; transition: all 0.3s; }
+    
+    .mi-bar-bg { height: 8px; background: #F3F4F6; border-radius: 4px; overflow: hidden; width: 100%; }
+    .mi-bar-fg { height: 100%; background: #7C3AED; border-radius: 4px; transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    
+    /* Vizuál pro splněný milník */
+    .milestone-item.done .mi-title { color: #10B981; }
+    .milestone-item.done .mi-count { color: #065F46; background: #A7F3D0; }
+    .milestone-item.done .mi-bar-fg { background: #10B981; }
 
-    .tc-dot { width: 24px; height: 24px; background: #F0EEF8; border: 4px solid #D1D5DB; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 2; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .tc-item.done .tc-dot { background: #10B981; border-color: #A7F3D0; transform: translateX(-50%) scale(1.2); box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-    .tc-item.done .tc-content { background: #F0FDF4; border-color: #86EFAC; opacity: 0.8; }
-    .tc-item.done .tc-content .name { color: #065F46; text-decoration: line-through; }
-
+    /* System View */
     #system-view { display: none; padding: 20px 16px 120px; }
     .sys-info { background: #EDE9FE; padding: 14px; border-radius: 16px; font-size: 13px; color: #5B21B6; font-weight: 600; margin-bottom: 24px; text-align: center; animation: slideUp 0.4s ease forwards; border: 1px solid #DDD6FE; line-height: 1.4; }
     .sys-add-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px dashed #C4B5FD; background: #F5F3FF; font-weight: 800; color: #7C3AED; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
     .sys-add-btn:active { transform: scale(0.98); background: #EDE9FE; }
 
+    /* FAB & Tabbar */
     .fab { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; background: #7C3AED; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(124,58,237,0.4); z-index: 50; transition: transform 0.2s; }
     .fab:active { transform: scale(0.9); }
     .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 12px 20px 24px; display: flex; justify-content: space-around; border-top: 1px solid #E5E7EB; z-index: 40; box-shadow: 0 -10px 20px rgba(0,0,0,0.03); }
@@ -98,6 +107,7 @@
     .tab.active svg { transform: scale(1.1); }
     .tab span { font-size: 11px; font-weight: 700; }
 
+    /* Modals & Inputs */
     .add-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; }
     .add-modal.open { display: flex; opacity: 1; }
     .modal-box { position: relative; background: white; border-radius: 24px 24px 0 0; padding: 32px 20px 40px; width: 100%; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1); }
@@ -109,27 +119,10 @@
     .modal-box input { width: 100%; font-size: 16px; padding: 16px; border-radius: 14px; border: 2px solid #E5E7EB; outline: none; margin-bottom: 24px; background: #F9FAFB; transition: border-color 0.2s; }
     .modal-box input:focus { border-color: #7C3AED; background: white; }
     
-    /* 🔥 OPRAVA PROSTORU KOLEM EMOJI 🔥 */
-    .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; } /* Větší mezera pod nadpisem */
+    .selector-title { font-size: 12px; font-weight: 800; color: #6B7280; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
     
-    .icon-grid { 
-      display: flex; gap: 12px; margin-bottom: 28px; overflow-x: auto; 
-      padding: 6px 6px 14px 6px; /* Větší padding, aby zvětšená ikonka neuřízla stín/okraj */
-    }
-    
-    .icon-opt { 
-      width: 52px; /* Zvětšená krabička */
-      height: 52px; /* Zvětšená krabička */
-      display: flex; 
-      align-items: center; justify-content: center; 
-      font-size: 26px; 
-      background: #F3F4F6; 
-      border-radius: 16px; 
-      cursor: pointer; 
-      border: 2px solid transparent; 
-      flex-shrink: 0; 
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-    }
+    .icon-grid { display: flex; gap: 12px; margin-bottom: 28px; overflow-x: auto; padding: 6px 6px 14px 6px; }
+    .icon-opt { width: 52px; height: 52px; display: grid; place-items: center; font-size: 26px; background: #F3F4F6; border-radius: 16px; cursor: pointer; border: 2px solid transparent; flex-shrink: 0; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom: 3px; -webkit-user-select: none; }
     .icon-opt.selected { background: #EDE9FE; border-color: #7C3AED; transform: scale(1.15); box-shadow: 0 4px 10px rgba(124,58,237,0.2); }
     
     .priority-selector { display: flex; gap: 10px; margin-bottom: 32px; }
@@ -163,8 +156,8 @@
   </div>
 
   <div id="journey-view">
-    <div class="journey-header"><h2>My Journey</h2><p>Odemykej milníky plněním denních úkolů</p></div>
-    <div class="timeline-center" id="journey-timeline"></div>
+    <div class="journey-header"><h2>Skill Trees</h2><p>Odemykej milníky ve svých oblastech</p></div>
+    <div class="journey-container" id="journey-container"></div>
   </div>
 
   <div id="system-view">
@@ -188,7 +181,7 @@
     <div class="close-modal" onclick="closeModal()"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
     
     <input id="task-input" placeholder="Co tě čeká?" autocomplete="off" />
-    <div class="selector-title">IKONA (Kategorie Journey)</div>
+    <div class="selector-title">IKONA (Kategorie dovednosti)</div>
     <div class="icon-grid" id="icon-picker">
       <div class="icon-opt selected" data-icon="💪">💪</div>
       <div class="icon-opt" data-icon="🏃‍♂️">🏃‍♂️</div>
@@ -216,14 +209,34 @@ let templates = JSON.parse(localStorage.getItem('myDailyTemplates')) || [
   { name: "Pít 0.5l vody", priority: "mid", icon: "💧" }
 ];
 
+// 🔥 Nová databáze milníků (Zde přidávej další)
 let milestones = [
   { title: "První trénink", target: 1, icon: "💪" },
   { title: "5 Tréninků", target: 5, icon: "💪" },
-  { title: "Knihomol: 3 dny čtení", target: 3, icon: "📚" },
   { title: "Konzistence: 20 Tréninků", target: 20, icon: "💪" },
-  { title: "Hydratace", target: 10, icon: "💧" },
-  { title: "Make.com Developer", target: 15, icon: "💻" }
+  
+  { title: "Začátek hydratace", target: 1, icon: "💧" },
+  { title: "Hydratace Level 10", target: 10, icon: "💧" },
+  
+  { title: "Přečíst 1 knihu", target: 5, icon: "📚" },
+  
+  { title: "První Webhook", target: 2, icon: "💻" },
+  { title: "Make.com Developer", target: 15, icon: "💻" },
+
+  { title: "První prodej", target: 1, icon: "💸" }
 ];
+
+// Automatické pojmenování kategorií podle ikony
+const categoryNames = {
+  "💪": "Cesta: Fitness & Síla",
+  "🏃‍♂️": "Cesta: Kardio",
+  "💧": "Cesta: Hydratace & Zdraví",
+  "📚": "Cesta: Osobní Rozvoj",
+  "💻": "Cesta: Developer Skilly",
+  "🍳": "Cesta: Zdravá Strava",
+  "🧘‍♂️": "Cesta: Mental Health",
+  "💸": "Cesta: Business & Profit"
+};
 
 let lastReset = localStorage.getItem('lastResetDate') || "";
 const CIRC = 2 * Math.PI * 29;
@@ -265,9 +278,10 @@ function buildCalendar() {
 
 function render() {
   const list = document.getElementById("task-list"); list.innerHTML = "";
-  const journey = document.getElementById("journey-timeline"); journey.innerHTML = "";
+  const journeyContainer = document.getElementById("journey-container"); journeyContainer.innerHTML = "";
   const tempDom = document.getElementById("template-list"); tempDom.innerHTML = "";
   
+  // 1. ROUTINE
   let todays = tasks.filter(t => t.date === selectedDay);
   const prioWeight = { 'high': 1, 'mid': 2, 'low': 3 };
   todays.sort((a, b) => {
@@ -292,28 +306,60 @@ function render() {
     list.appendChild(el);
   });
 
+  // 2. JOURNEY (Skill Trees podle kategorií)
   const allHistoryDone = tasks.filter(t => t.done);
   
-  milestones.forEach((m, i) => {
-    const currentScore = allHistoryDone.filter(t => t.icon === m.icon).length;
-    const isDone = currentScore >= m.target;
-    const displayCount = currentScore > m.target ? m.target : currentScore;
-
-    const jel = document.createElement("div"); 
-    jel.className = "tc-item" + (isDone ? " done" : "");
-    jel.style.animationDelay = `${i * 0.08}s`;
-    jel.innerHTML = `
-      <div class="tc-content">
-        <span class="icon">${m.icon}</span>
-        <span class="name">${m.title}</span>
-        <div class="ms-progress">${displayCount} / ${m.target}</div>
-      </div>
-      <div class="tc-dot"></div>
-      <div style="width: 42%;"></div>
-    `;
-    journey.appendChild(jel);
+  // Seskupíme milníky podle ikony
+  const groupedMilestones = {};
+  milestones.forEach(m => {
+    if (!groupedMilestones[m.icon]) groupedMilestones[m.icon] = [];
+    groupedMilestones[m.icon].push(m);
   });
 
+  // Vykreslíme karty
+  Object.keys(groupedMilestones).forEach((icon, index) => {
+    const categoryName = categoryNames[icon] || "Dovednosti";
+    const group = groupedMilestones[icon];
+    
+    const card = document.createElement("div");
+    card.className = "skill-card";
+    card.style.animationDelay = `${index * 0.1}s`;
+    
+    // Hlavička karty
+    let cardHTML = `
+      <div class="sc-header">
+        <div class="sc-icon">${icon}</div>
+        <div class="sc-title">${categoryName}</div>
+      </div>
+      <div class="sc-body">
+    `;
+    
+    // Milníky uvnitř karty
+    group.forEach(m => {
+      const currentScore = allHistoryDone.filter(t => t.icon === m.icon).length;
+      const isDone = currentScore >= m.target;
+      const displayCount = currentScore > m.target ? m.target : currentScore;
+      const pct = (displayCount / m.target) * 100;
+
+      cardHTML += `
+        <div class="milestone-item ${isDone ? 'done' : ''}">
+          <div class="mi-top">
+            <div class="mi-title">${m.title}</div>
+            <div class="mi-count">${displayCount} / ${m.target}</div>
+          </div>
+          <div class="mi-bar-bg">
+            <div class="mi-bar-fg" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      `;
+    });
+    
+    cardHTML += `</div>`; // Uzavření body
+    card.innerHTML = cardHTML;
+    journeyContainer.appendChild(card);
+  });
+
+  // 3. SYSTEM
   templates.forEach((temp, i) => {
     const tel = document.createElement("div"); tel.className = `task priority-${temp.priority}`;
     tel.style.animationDelay = `${i * 0.05}s`;
@@ -328,6 +374,7 @@ function render() {
     tempDom.appendChild(tel);
   });
 
+  // Progress Update
   const done = todays.filter(t => t.done).length, total = todays.length;
   const pct = total ? Math.round((done / total) * 100) : 0;
   document.getElementById("ring").style.strokeDashoffset = CIRC - (pct/100)*CIRC;
