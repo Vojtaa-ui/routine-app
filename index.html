@@ -374,16 +374,43 @@ function closeJourneyDetail() { document.getElementById("journey-hub").style.dis
 function showView(v) { ['routine','journey','system'].forEach(id => document.getElementById(id+'-view').style.display = (id===v?'block':'none')); document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.getElementById('tab-'+v).classList.add('active'); if(v==='journey') closeJourneyDetail(); }
 
 function buildCalendar() { 
-  const cal = document.getElementById("calendar"); cal.innerHTML = ""; 
-  const daysAbbr = ["PO","ÚT","ST","ČT","PÁ","SO","NE"];
-  const nums = [20,21,22,23,24,25,26]; 
-  nums.forEach((n, i) => { 
-    const d = document.createElement("div"); d.className = "cal-day" + (n === selectedDay ? " active" : ""); 
-    d.innerHTML = `<div class="day-label">${daysAbbr[i]}</div><div class="day-num">${n}</div>`; 
-    d.onclick = () => { selectedDay = n; buildCalendar(); render(); }; 
+  const cal = document.getElementById("calendar"); 
+  cal.innerHTML = ""; 
+  
+  const today = new Date();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
+  
+  // Zjistí, kolik dní má aktuální měsíc
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  
+  const daysAbbr = ["NE","PO","ÚT","ST","ČT","PÁ","SO"];
+  const monthNames = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"];
+
+  // Generuje dny 1 až 30/31
+  for (let i = 1; i <= daysInMonth; i++) {
+    const dDate = new Date(currentYear, currentMonth, i);
+    const dayName = daysAbbr[dDate.getDay()];
+    
+    const d = document.createElement("div"); 
+    d.className = "cal-day" + (i === selectedDay ? " active" : ""); 
+    d.innerHTML = `<div class="day-label">${dayName}</div><div class="day-num">${i}</div>`; 
+    
+    d.onclick = () => { 
+      selectedDay = i; 
+      buildCalendar(); 
+      render(); 
+    }; 
+    
     cal.appendChild(d); 
-  }); 
-  document.getElementById("date-label").innerText = `${selectedDay} April 2026`; 
+    
+    // Auto-scroll na aktuální den
+    if (i === selectedDay) {
+      setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }), 100);
+    }
+  } 
+  
+  document.getElementById("date-label").innerText = `${selectedDay}. ${monthNames[currentMonth]} ${currentYear}`; 
 }
 
 function openModal(mode) {
