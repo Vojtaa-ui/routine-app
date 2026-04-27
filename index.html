@@ -42,12 +42,43 @@
     .counter-badge.pending { background: #FEF2F2; color: #EF4444; border-color: #FCA5A5; animation: pulseRed 2s infinite; }
     .counter-badge.all-done { background: #10B981; color: white; border-color: #10B981; transform: scale(1.1); animation: victoryPulse 2s infinite; }
 
-    /* --- 4. KALENDÁŘ SE ZKRATKAMI --- */
-    .calendar { display: flex; justify-content: space-between; padding: 12px 16px; gap: 6px; }
-    .cal-day { flex: 1; text-align: center; cursor: pointer; border-radius: 14px; padding: 8px 2px; border: 1px solid #D1D5DB; background: white; transition: all 0.2s; }
-    .cal-day.active { border-color: #7C3AED; background: #EDE9FE; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(124,58,237,0.1); }
-    .cal-day .day-label { font-size: 9px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; margin-bottom: 2px; }
-    .cal-day .day-num { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 14px; font-weight: 800; }
+  /* ==========================================================================
+       4. KALENDÁŘ SE ZKRATKAMI (DYNAMICKÝ SCROLL)
+       ========================================================================== */
+    .calendar { 
+      display: flex; 
+      overflow-x: auto; /* Aktivuje posouvání do stran */
+      padding: 15px 16px; 
+      gap: 10px; 
+      scrollbar-width: none; /* Skryje lištu ve Firefoxu */
+      scroll-behavior: smooth;
+    }
+    
+    .calendar::-webkit-scrollbar { 
+      display: none; /* Skryje lištu v Chrome/Safari/iOS */
+    }
+
+    .cal-day { 
+      flex-shrink: 0; /* Zakáže smrskávání buněk */
+      width: 52px; /* Pevná šířka, ať to vypadá čistě */
+      text-align: center; 
+      cursor: pointer; 
+      border-radius: 16px; 
+      padding: 10px 4px; 
+      border: 1px solid #D1D5DB; 
+      background: white; 
+      transition: all 0.2s ease; 
+    }
+
+    .cal-day.active { 
+      border-color: #7C3AED; 
+      background: #EDE9FE; 
+      transform: translateY(-2px); 
+      box-shadow: 0 4px 12px rgba(124,58,237,0.12); 
+    }
+
+    .cal-day .day-label { font-size: 9px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; margin-bottom: 3px; }
+    .cal-day .day-num { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 14px; font-weight: 800; }
     .cal-day.active .day-num { background: #7C3AED; color: white; }
 
     /* --- 5. PROGRESS CARD --- */
