@@ -245,7 +245,25 @@ let selectedPriority = "mid";
 let modalMode = 'task';
 
 /* --- CORE LOGIC --- */
-function save() { localStorage.setItem('myRPG_v25_tasks', JSON.stringify(tasks)); localStorage.setItem('myRPG_v25_temps', JSON.stringify(templates)); }
+function save() { 
+  // 1. Uložení do mobilu (to už znáš, lokální paměť)
+  localStorage.setItem('myRPG_v26_tasks', JSON.stringify(tasks)); 
+  localStorage.setItem('myRPG_v26_temps', JSON.stringify(templates)); 
+
+  // 2. Odeslání do Make.com (Tvůj první API Call!)
+  const webhookURL = "https://hook.eu1.make.com/qylt0vlr18lvxu16acgmihjd38pmkvi3"; 
+  
+  fetch(webhookURL, {
+    method: "POST", // Říkáme, že posíláme data
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ 
+      cas_ulozeni: new Date().toISOString(),
+      vsechny_ukoly: tasks 
+    })
+  })
+  .then(response => console.log("Odesláno do Make!", response.status))
+  .catch(err => console.log("Make.com neodpovídá:", err));
+}
 function checkAutoReset() { const now = new Date(); if (lastResetDate !== now.toDateString() && now.getHours() >= 4) { templates.forEach(t => tasks.push({ id: Date.now()+Math.random(), name:t.name, icon:t.icon, priority:t.priority, done:false, date:now.getDate() })); localStorage.setItem('lastResetDate_v25', now.toDateString()); lastResetDate=now.toDateString(); save(); } }
 
 function render() {
