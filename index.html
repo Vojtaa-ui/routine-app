@@ -292,12 +292,13 @@
 
 <script>
 /* --- DATA --- */
-let tasks = JSON.parse(localStorage.getItem('myRPG_v25_tasks')) || [];
-let templates = JSON.parse(localStorage.getItem('myRPG_v25_temps')) || [
+let tasks = JSON.parse(localStorage.getItem('myRPG_v26_tasks')) || [];
+let templates = JSON.parse(localStorage.getItem('myRPG_v26_temps')) || [
   { name: "Práce na Make.com", priority: "high", icon: "💻" },
   { name: "Trénink", priority: "mid", icon: "💪" }
 ];
-let lastResetDate = localStorage.getItem('lastResetDate_v25') || "";
+// TADY POZOR: Musí to být lastResetDate_v26
+let lastResetDate = localStorage.getItem('lastResetDate_v26') || "";
 
 const icons = ["💪", "💻", "📚", "💧", "💸", "🏃‍♂️", "🎯", "🔥", "🍳"];
 const milestones = [
@@ -383,7 +384,33 @@ function save() {
   .then(response => console.log("Odesláno do Make!", response.status))
   .catch(err => console.log("Make.com neodpovídá:", err));
 }
-function checkAutoReset() { const now = new Date(); if (lastResetDate !== now.toDateString() && now.getHours() >= 4) { templates.forEach(t => tasks.push({ id: Date.now()+Math.random(), name:t.name, icon:t.icon, priority:t.priority, done:false, date:now.getDate() })); localStorage.setItem('lastResetDate_v25', now.toDateString()); lastResetDate=now.toDateString(); save(); } }
+function checkAutoReset() { 
+  const now = new Date(); 
+  const todayStr = now.toDateString(); 
+
+  // Kontrola: Je jiný den než minule A je aspoň 4:00 ráno?
+  if (lastResetDate !== todayStr && now.getHours() >= 4) { 
+    console.log("Provádím ranní spawn úkolů...");
+
+    templates.forEach(t => {
+      tasks.push({ 
+        id: Date.now() + Math.random(), 
+        name: t.name, 
+        icon: t.icon, 
+        priority: t.priority, 
+        done: false, 
+        date: parseInt(now.getDate()) // Převede na číslo pro kalendář
+      });
+    });
+
+    // ZAPISUJEME DO PAMĚTI
+    lastResetDate = todayStr; 
+    localStorage.setItem('lastResetDate_v26', todayStr); 
+    
+    save(); 
+    render(); 
+  } 
+}
 
 function render() {
   const list = document.getElementById("task-list"); list.innerHTML = "";
