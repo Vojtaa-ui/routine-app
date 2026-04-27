@@ -81,6 +81,33 @@
     .cal-day .day-num { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto; font-size: 14px; font-weight: 800; }
     .cal-day.active .day-num { background: #7C3AED; color: white; }
 
+/* MODAL PRO KALENDÁŘ */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); display: none; z-index: 1000;
+      backdrop-filter: blur(5px); justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background: white; width: 90%; max-height: 80%; border-radius: 24px;
+      padding: 24px; position: relative; overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .close-modal {
+      position: absolute; top: 15px; right: 15px; font-size: 20px; color: #9CA3AF;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 20px;
+    }
+    .stats-cell {
+      aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 10px; font-weight: 700;
+    }
+    /* Barvy buněk */
+    .cell-none { background: #F3F4F6; color: #9CA3AF; }
+    .cell-all { background: #10B981; color: white; } /* Zelená */
+    .cell-some { background: #F59E0B; color: white; } /* Oranžová */
+    .cell-fail { background: #EF4444; color: white; } /* Červená */
+
     /* --- 5. PROGRESS CARD --- */
     .progress-card { background: white; margin: 10px 16px 20px; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; border: 1px solid #D1D5DB; animation: slideUp 0.5s ease; }
     .ring-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
@@ -198,6 +225,24 @@
       <div class="counter-badge" id="main-counter"><span id="counter-text">0</span></div>
     </div>
     <div class="calendar" id="calendar"></div>
+    <div style="padding: 0 16px; margin-top: 10px;">
+    <button onclick="openStats()" style="background:#7C3AED; color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:800; width:100%; cursor:pointer;">
+        ZOBRAZIT PŘEHLED AKTIVITY 📊
+    </button>
+</div>
+
+<div id="statsModal" class="modal-overlay" onclick="closeStats(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <span class="close-modal" onclick="document.getElementById('statsModal').style.display='none'">✕</span>
+    <h2 id="modalTitle" style="margin-top:0; color:#1F2937;">Měsíční Progress</h2>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div style="margin-top:20px; font-size:12px; color: #6B7280; background: #F9FAFB; padding: 10px; border-radius: 12px;">
+        <p style="margin:5px 0;">🟢 Vše hotovo</p>
+        <p style="margin:5px 0;">🟠 Částečně splněno</p>
+        <p style="margin:5px 0;">🔴 Ani jeden úkol</p>
+    </div>
+  </div>
+</div>
     <div class="progress-card">
       <div class="ring-wrap"><svg viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="35"/><circle class="ring-fg" id="ring" cx="40" cy="40" r="35" stroke-dasharray="219.9" stroke-dashoffset="219.9"/></svg><div class="ring-pct" id="pct-text">0%</div></div>
       <div style="flex:1"><h2>Denní progres</h2><p id="progress-sub" style="font-size:12px;color:#666">0 z 0 hotovo</p></div>
@@ -274,6 +319,49 @@ let selectedDay = new Date().getDate();
 let currentIcon = "💪";
 let selectedPriority = "mid";
 let modalMode = 'task';
+
+/* ==========================================================================
+   STATISTIKY & CONSISTENCY TRACKER (MODAL)
+   Popis: Funkce pro výpočet a zobrazení měsíční heatmapy aktivity.
+   ========================================================================== */
+function openStats() {
+    const modal = document.getElementById('statsModal');
+    const grid = document.getElementById('statsGrid');
+    grid.innerHTML = ""; // Vyčistí stará data
+    modal.style.display = 'flex'; // Ukáže okno
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'stats-cell';
+        cell.innerText = i;
+
+        // Tady prohledáme úkoly pro konkrétní den
+        const dayTasks = tasks.filter(t => t.date === i);
+        
+        if (dayTasks.length === 0) {
+            cell.classList.add('cell-none'); // Šedá - nic nebylo v plánu
+        } else {
+            const doneCount = dayTasks.filter(t => t.done).length;
+            if (doneCount === dayTasks.length) {
+                cell.classList.add('cell-all'); // Zelená - vše hotovo
+            } else if (doneCount > 0) {
+                cell.classList.add('cell-some'); // Oranžová - něco hotovo
+            } else {
+                cell.classList.add('cell-fail'); // Červená - nic nesplněno
+            }
+        }
+        grid.appendChild(cell);
+    }
+}
+
+function closeStats(e) {
+    document.getElementById('statsModal').style.display = 'none';
+}
 
 /* --- CORE LOGIC --- */
 function save() { 
